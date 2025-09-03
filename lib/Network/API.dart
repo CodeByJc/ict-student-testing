@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 const String host = "https://212d2dcc592c.ngrok-free.app";
 
 // relative path to your PHP API inside htdocs
-const String serverPath = "/ict-server-main/api/index.php";
+const String serverPath = "/ict-server-testing/api/index.php";
 
 // build the base URL
 const String API_BASE_URL = "$host$serverPath";
