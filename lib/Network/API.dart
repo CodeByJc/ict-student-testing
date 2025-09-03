@@ -2,7 +2,7 @@
 import 'package:http/http.dart' as http;
 
 // ngrok public URL (changes every time you restart ngrok unless you have a reserved domain)
-const String host = "https://2c135f9345ab.ngrok-free.app";
+const String host = "https://212d2dcc592c.ngrok-free.app";
 
 // relative path to your PHP API inside htdocs
 const String serverPath = "/ict-server-main/api/index.php";
