@@ -10,6 +10,14 @@ import '../../Helper/Components.dart';
 import '../../Helper/colors.dart';
 import '../../Helper/size.dart';
 
+//for url validation
+bool isValidUrl(String? url) {
+  if (url == null || url.isEmpty) return false;
+  final Uri? uri = Uri.tryParse(url);
+  return uri != null && (uri.isScheme("http") || uri.isScheme("https"));
+}
+
+
 class CompanyScreen extends GetView<CompanyListController> {
   const CompanyScreen({super.key});
 
@@ -188,52 +196,40 @@ class CompanyScreen extends GetView<CompanyListController> {
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: company.companyWebsite
-                                        .isEmpty
+                                    onPressed: !isValidUrl(company.companyWebsite)
                                         ? null
-                                        : () => _launchUrl(
-                                        company.companyWebsite),
+                                        : () => _launchUrl(company.companyWebsite),
                                     icon: HugeIcon(
-                                      icon: HugeIcons
-                                          .strokeRoundedLink02,
-                                      color: company.companyWebsite
-                                          .isEmpty
-                                          ? Colors.grey
-                                          : Colors.white,
-                                    ),
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: company
-                                          .companyWebsite.isEmpty
-                                          ? Colors.grey
-                                          : Colors.lightGreen,
-                                      disabledBackgroundColor:
-                                      Colors.grey,
-                                    ),
-                                    tooltip: "Website",
-                                  ),
-                                  const SizedBox(width: 5),
-                                  IconButton(
-                                    onPressed: company.companyLinkedin
-                                        .isEmpty
-                                        ? null
-                                        : () => _launchUrl(
-                                        company.companyLinkedin,
-                                        isLinkedIn: true),
-                                    icon: HugeIcon(
-                                      icon: HugeIcons
-                                          .strokeRoundedLinkedin01,
-                                      color: company.companyLinkedin
-                                          .isEmpty
+                                      icon: HugeIcons.strokeRoundedLink02,
+                                      color: !isValidUrl(company.companyWebsite)
                                           ? Colors.white54
                                           : Colors.white,
                                     ),
                                     style: IconButton.styleFrom(
-                                      backgroundColor: company
-                                          .companyLinkedin.isEmpty
+                                      backgroundColor: !isValidUrl(company.companyWebsite)
+                                          ? Colors.grey
+                                          : Colors.lightGreen,
+                                      disabledBackgroundColor: Colors.grey,
+                                    ),
+                                    tooltip: "Website",
+                                  ),
+
+                                  const SizedBox(width: 5),
+                                  IconButton(
+                                    onPressed: !isValidUrl(company.companyLinkedin)
+                                        ? null
+                                        : () => _launchUrl(company.companyLinkedin, isLinkedIn: true),
+                                    icon: HugeIcon(
+                                      icon: HugeIcons.strokeRoundedLinkedin01,
+                                      color: !isValidUrl(company.companyLinkedin)
+                                          ? Colors.white54
+                                          : Colors.white,
+                                    ),
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: !isValidUrl(company.companyLinkedin)
                                           ? Colors.grey
                                           : LinkedinColor,
-                                      disabledBackgroundColor:
-                                      Colors.grey,
+                                      disabledBackgroundColor: Colors.grey,
                                     ),
                                     tooltip: "LinkedIn",
                                   ),
