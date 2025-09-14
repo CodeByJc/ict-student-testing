@@ -2,7 +2,7 @@
 import 'package:http/http.dart' as http;
 
 // ngrok public URL (changes every time you restart ngrok unless you have a reserved domain)
-const String host = "https://474125367d32.ngrok-free.app";
+const String host = "https://publicly-awake-cricket.ngrok-free.app";
 
 // relative path to your PHP API inside htdocs
 const String serverPath = "/ict-server-testing/api/index.php";
@@ -32,6 +32,7 @@ String attendanceByDateAPI = '$host$serverPath/Attendance/AttendanceByDate';
 // ====================== PARENT / FACULTY ======================
 String facultyContactAPI = '$host$serverPath/Parent/getFacultyContact';
 String timetableAPI = '$host$serverPath/Parent/getStudentTimetable';
+String getmentorAPI = '$host$serverPath/Faculty/getMentorByStudent';
 
 // ====================== EXAM ======================
 String examListAPI = '$host$serverPath/Exam/getExamList';
