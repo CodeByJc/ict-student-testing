@@ -17,52 +17,71 @@ bool isValidUrl(String? url) {
   return uri != null && (uri.isScheme("http") || uri.isScheme("https"));
 }
 
-
-class CompanyScreen extends GetView<CompanyListController> {
+class CompanyScreen extends StatefulWidget {
   const CompanyScreen({super.key});
+
+  @override
+  State<CompanyScreen> createState() => _CompanyScreenState();
+}
+
+class _CompanyScreenState extends State<CompanyScreen> {
+  final CompanyListController controller = Get.put(CompanyListController());
+  String? selectedDomain; // dropdown filter
+  final FocusNode focusNode = FocusNode();
 
   Future<void> _launchUrl(String? url, {bool isLinkedIn = false}) async {
     if (url == null || url.isEmpty) return;
 
     final Uri uri = Uri.parse(url);
-    if (isLinkedIn) {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-      }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+        mode: isLinkedIn
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      );
     } else {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-      } else {
-        Get.snackbar("Error", "Could not launch $url");
-      }
+      Get.snackbar("Error", "Could not launch $url");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Define FocusNode for TextField focus tracking
-    final FocusNode focusNode = FocusNode();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Companies",
-          style: appbarStyle(context),
-        ),
+        title: Text("Companies", style: appbarStyle(context)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded, color: backgroundColor),
-          onPressed: () {
-            Get.back();
-          },
+          onPressed: () => Get.back(),
         ),
       ),
-      body: Obx(
-            () => RefreshIndicator(
+      body: Obx(() {
+        if (controller.isLoadingCompanyList.value) {
+          return const AdaptiveLoadingScreen();
+        }
+
+        // Get all unique domains
+        List<String> allDomains = controller.companyList
+            .expand((c) => c.companyDomain)
+            .toSet()
+            .toList();
+
+        // Filter based on search + domain
+        final query = controller.searchController.text.toLowerCase();
+        final filteredCompanies = controller.companyList.where((company) {
+          final matchesSearch =
+          company.companyName.toLowerCase().contains(query);
+          final matchesDomain = selectedDomain == null
+              ? true
+              : company.companyDomain.contains(selectedDomain);
+          return matchesSearch && matchesDomain;
+        }).toList();
+
+        return RefreshIndicator(
           onRefresh: () => controller.fetchCompanyList(),
           child: Column(
             children: [
+              // Search bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: TextField(
@@ -72,23 +91,20 @@ class CompanyScreen extends GetView<CompanyListController> {
                   decoration: InputDecoration(
                     labelText: 'Search Companies',
                     floatingLabelBehavior: FloatingLabelBehavior.never,
-                    labelStyle: TextStyle(
-                      fontFamily: "mu_reg",
-                      color: muGrey2,
-                    ),
+                    labelStyle: TextStyle(fontFamily: "mu_reg", color: muGrey2),
                     prefixIcon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedSearch01,
-                      color:focusNode.hasPrimaryFocus ? muColor : muGrey2
-                    ),
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: focusNode.hasPrimaryFocus ? muColor : muGrey2),
                     suffixIcon: controller.searchController.text.isNotEmpty
                         ? IconButton(
                       icon: HugeIcon(
                         icon: HugeIcons.strokeRoundedCancel01,
-                        color: focusNode.hasFocus ? muColor : muGrey2,
+                        color:
+                        focusNode.hasFocus ? muColor : muGrey2,
                       ),
                       onPressed: () {
                         controller.searchController.clear();
-                        controller.filterCompanies('');
+                        setState(() => selectedDomain = null);
                       },
                     )
                         : null,
@@ -97,8 +113,7 @@ class CompanyScreen extends GetView<CompanyListController> {
                       borderRadius: BorderRadius.circular(borderRad),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: muGrey2),
+                      borderSide: BorderSide(color: muGrey2),
                       borderRadius: BorderRadius.circular(borderRad),
                     ),
                   ),
@@ -107,27 +122,56 @@ class CompanyScreen extends GetView<CompanyListController> {
                     fontFamily: "mu_reg",
                     fontWeight: FontWeight.w500,
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
               ),
+
               const SizedBox(height: 10),
+
+              // Domain filter dropdown
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: DropdownButtonFormField<String>(
+                  value: selectedDomain,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(borderRad),
+                    ),
+                    contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  hint: const Text("Filter by Domain"),
+                  items: [
+                    const DropdownMenuItem(
+                        value: null, child: Text("All Domains")),
+                    ...allDomains.map((d) =>
+                        DropdownMenuItem(value: d, child: Text(d))),
+                  ],
+                  onChanged: (value) {
+                    setState(() => selectedDomain = value);
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Companies list
               Expanded(
-                child: controller.isLoadingCompanyList.value
-                    ? const AdaptiveLoadingScreen()
-                    : controller.filteredCompanyList.isEmpty
+                child: filteredCompanies.isEmpty
                     ? Center(
                   child: Text(
                     "No companies found",
                     style: TextStyle(
-                      fontSize: getSize(context, 2),
-                      color: muGrey2,
-                    ),
+                        fontSize: getSize(context, 2),
+                        color: muGrey),
                   ),
                 )
                     : ListView.builder(
-                  itemCount: controller.filteredCompanyList.length,
+                  itemCount: filteredCompanies.length,
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
                   itemBuilder: (context, index) {
-                    final company = controller.filteredCompanyList[index];
+                    final company = filteredCompanies[index];
                     return SlideZoomInAnimation(
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
@@ -181,11 +225,34 @@ class CompanyScreen extends GetView<CompanyListController> {
                                           child: Text(
                                             company.companyType,
                                             style: TextStyle(
+                                                fontSize: getSize(
+                                                    context, 1.8)),
+                                            overflow:
+                                            TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        HugeIcon(
+                                            icon: HugeIcons
+                                                .strokeRoundedLayers01,
+                                            color: muColor),
+                                        const SizedBox(width: 7),
+                                        Flexible(
+                                          child: Text(
+                                            company.companyDomain
+                                                .join(", "),
+                                            style: TextStyle(
                                               fontSize: getSize(
-                                                  context, 1.8),
+                                                  context, 1.7),
+                                              color: muGrey2,
                                             ),
                                             overflow:
                                             TextOverflow.ellipsis,
+                                            maxLines: 2,
                                           ),
                                         ),
                                       ],
@@ -196,40 +263,52 @@ class CompanyScreen extends GetView<CompanyListController> {
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: !isValidUrl(company.companyWebsite)
+                                    onPressed: !isValidUrl(
+                                        company.companyWebsite)
                                         ? null
-                                        : () => _launchUrl(company.companyWebsite),
+                                        : () =>
+                                        _launchUrl(company.companyWebsite),
                                     icon: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedLink02,
-                                      color: !isValidUrl(company.companyWebsite)
+                                      icon: HugeIcons
+                                          .strokeRoundedLink02,
+                                      color: !isValidUrl(
+                                          company.companyWebsite)
                                           ? Colors.white54
                                           : Colors.white,
                                     ),
                                     style: IconButton.styleFrom(
-                                      backgroundColor: !isValidUrl(company.companyWebsite)
+                                      backgroundColor: !isValidUrl(
+                                          company.companyWebsite)
                                           ? Colors.grey
                                           : Colors.lightGreen,
-                                      disabledBackgroundColor: Colors.grey,
+                                      disabledBackgroundColor:
+                                      Colors.grey,
                                     ),
                                     tooltip: "Website",
                                   ),
-
                                   const SizedBox(width: 5),
                                   IconButton(
-                                    onPressed: !isValidUrl(company.companyLinkedin)
+                                    onPressed: !isValidUrl(
+                                        company.companyLinkedin)
                                         ? null
-                                        : () => _launchUrl(company.companyLinkedin, isLinkedIn: true),
+                                        : () => _launchUrl(
+                                        company.companyLinkedin,
+                                        isLinkedIn: true),
                                     icon: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedLinkedin01,
-                                      color: !isValidUrl(company.companyLinkedin)
+                                      icon: HugeIcons
+                                          .strokeRoundedLinkedin01,
+                                      color: !isValidUrl(
+                                          company.companyLinkedin)
                                           ? Colors.white54
                                           : Colors.white,
                                     ),
                                     style: IconButton.styleFrom(
-                                      backgroundColor: !isValidUrl(company.companyLinkedin)
+                                      backgroundColor: !isValidUrl(
+                                          company.companyLinkedin)
                                           ? Colors.grey
                                           : LinkedinColor,
-                                      disabledBackgroundColor: Colors.grey,
+                                      disabledBackgroundColor:
+                                      Colors.grey,
                                     ),
                                     tooltip: "LinkedIn",
                                   ),
@@ -245,8 +324,8 @@ class CompanyScreen extends GetView<CompanyListController> {
               ),
             ],
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
