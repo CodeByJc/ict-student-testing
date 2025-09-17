@@ -13,6 +13,7 @@ import '../../Helper/colors.dart';
 import '../../Helper/size.dart';
 import '../../Widgets/clickable_text.dart';
 import '../Loading/campus_drive_update_loading.dart';
+
 // URL Validator
 bool isValidUrl(String? url) {
   if (url == null || url.isEmpty) return false;
