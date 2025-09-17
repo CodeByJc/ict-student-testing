@@ -13,7 +13,12 @@ import '../../Helper/colors.dart';
 import '../../Helper/size.dart';
 import '../../Widgets/clickable_text.dart';
 import '../Loading/campus_drive_update_loading.dart';
-
+// URL Validator
+bool isValidUrl(String? url) {
+  if (url == null || url.isEmpty) return false;
+  final Uri? uri = Uri.tryParse(url);
+  return uri != null && (uri.isScheme("http") || uri.isScheme("https"));
+}
 class CampusDriveDetailScreen extends GetView<CampusDriveController> {
   const CampusDriveDetailScreen({super.key});
 
@@ -51,9 +56,12 @@ class CampusDriveDetailScreen extends GetView<CampusDriveController> {
 
     /// ✅ FIXED: renamed from launchUrl → openUrl
     Future<void> openUrl(String? url, {bool isLinkedIn = false}) async {
-      if (url == null || url.isEmpty) return;
+      if (!isValidUrl(url)) {
+        Get.snackbar("Error", "Invalid or empty link");
+        return;
+      }
 
-      final Uri uri = Uri.parse(url);
+      final Uri uri = Uri.parse(url!);
       if (await canLaunchUrl(uri)) {
         await launchUrl(
           uri,
@@ -65,6 +73,7 @@ class CampusDriveDetailScreen extends GetView<CampusDriveController> {
         Get.snackbar("Error", "Could not launch $url");
       }
     }
+
 
     // Format date and time
     String DateAndTime() {
@@ -331,21 +340,19 @@ class CampusDriveDetailScreen extends GetView<CampusDriveController> {
                           "Website",
                           style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
-                        onPressed: campusDrive.campusDriveCompanyWebsite.isEmpty
+                        onPressed: !isValidUrl(campusDrive.campusDriveCompanyWebsite)
                             ? null
-                            : () => openUrl(
-                                campusDrive.campusDriveCompanyWebsite),
+                            : () => openUrl(campusDrive.campusDriveCompanyWebsite),
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedLink02,
-                          color: campusDrive.campusDriveCompanyWebsite.isEmpty
-                              ? Colors.grey
+                          color: !isValidUrl(campusDrive.campusDriveCompanyWebsite)
+                              ? Colors.white54
                               : Colors.white,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor:
-                              campusDrive.campusDriveCompanyWebsite.isEmpty
-                                  ? Colors.grey
-                                  : Colors.lightGreen,
+                          backgroundColor: !isValidUrl(campusDrive.campusDriveCompanyWebsite)
+                              ? Colors.grey
+                              : Colors.lightGreen,
                           disabledBackgroundColor: Colors.grey,
                         ),
                       ),
@@ -355,23 +362,22 @@ class CampusDriveDetailScreen extends GetView<CampusDriveController> {
                           "LinkedIn",
                           style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
-                        onPressed: campusDrive.campusDriveCompanyLinkedin.isEmpty
+                        onPressed: !isValidUrl(campusDrive.campusDriveCompanyLinkedin)
                             ? null
                             : () => openUrl(
-                                  campusDrive.campusDriveCompanyLinkedin,
-                                  isLinkedIn: true,
-                                ),
+                          campusDrive.campusDriveCompanyLinkedin,
+                          isLinkedIn: true,
+                        ),
                         icon: HugeIcon(
                           icon: HugeIcons.strokeRoundedLinkedin01,
-                          color: campusDrive.campusDriveCompanyLinkedin.isEmpty
+                          color: !isValidUrl(campusDrive.campusDriveCompanyLinkedin)
                               ? Colors.white54
                               : Colors.white,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor:
-                              campusDrive.campusDriveCompanyLinkedin.isEmpty
-                                  ? Colors.grey
-                                  : LinkedinColor,
+                          backgroundColor: !isValidUrl(campusDrive.campusDriveCompanyLinkedin)
+                              ? Colors.grey
+                              : LinkedinColor,
                           disabledBackgroundColor: Colors.grey,
                         ),
                       ),
