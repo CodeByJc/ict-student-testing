@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../Helper/Utils.dart';
 import '../Model/faculty_list_model.dart';
 import '../Model/feedback_model.dart';
@@ -9,29 +10,41 @@ import '../Network/API.dart';
 import 'internet_connectivity.dart';
 
 class FeedbackController extends GetxController {
+  /// Internet connectivity controller (checks for online/offline status)
   final internetController = Get.find<InternetConnectivityController>();
+
+  /// Feedback history list
   RxList<FeedbackModel> feedbackDataList = <FeedbackModel>[].obs;
   RxBool isLoadingFeedbackList = true.obs;
+
+  /// Faculty list for dropdown
   RxList<FacultyListModel> facultyDataList = <FacultyListModel>[].obs;
   RxBool isLoadingFacultyList = true.obs;
+
+  /// Add feedback loader
   RxBool isAddingFeedback = false.obs;
+
+  /// Student and semester IDs passed from navigation arguments
   int studentId = Get.arguments['student_id'];
   int semId = Get.arguments['sem_id'];
 
-  // Form state
+  /// Form state
   final TextEditingController reviewController = TextEditingController();
   Rx<FacultyListModel?> selectedFaculty = Rx<FacultyListModel?>(null);
   RxBool canSubmit = false.obs; // Tracks submit button state
 
-  // Feedback history expansion state
+  /// Tracks which feedback reviews are expanded
   RxMap<int, bool> expandedReviews = <int, bool>{}.obs;
 
   @override
   void onInit() {
     super.onInit();
+
+    // Fetch initial data
     fetchFeedbackList();
     fetchFacultyList();
-    // Listen to reviewController changes to update canSubmit
+
+    // Enable/disable submit button based on review text
     reviewController.addListener(() {
       canSubmit.value = reviewController.text.trim().isNotEmpty;
     });
@@ -43,8 +56,10 @@ class FeedbackController extends GetxController {
     super.onClose();
   }
 
+  /// Fetch feedback history for the logged-in student
   Future<void> fetchFeedbackList() async {
     isLoadingFeedbackList.value = true;
+
     await internetController.checkConnection();
     if (!internetController.isConnected.value) {
       isLoadingFeedbackList.value = false;
@@ -56,8 +71,9 @@ class FeedbackController extends GetxController {
     }
 
     try {
+      final url = Uri.parse('$feedbackHistory?student_id=$studentId');
       final response = await http.get(
-        Uri.parse('$feedbackHistory?student_id=$studentId'),
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': validApiKey,
@@ -66,17 +82,19 @@ class FeedbackController extends GetxController {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body) as Map<String, dynamic>;
+
         if (responseData['status'] == true) {
           final feedbackList = responseData['data'] as List<dynamic>;
+
+          // Parse feedback data into models
           feedbackDataList.assignAll(
             feedbackList.map((data) {
               try {
                 return FeedbackModel.fromJson(data);
               } catch (e) {
-                print('Error parsing feedback: $data, error: $e');
-                return null; // Skip invalid entries
+                return null;
               }
-            }).where((feedback) => feedback != null).cast<FeedbackModel>().toList(),
+            }).where((f) => f != null).cast<FeedbackModel>().toList(),
           );
         } else {
           Get.snackbar(
@@ -87,7 +105,8 @@ class FeedbackController extends GetxController {
           );
         }
       } else {
-        final message = json.decode(response.body)['message'] ?? 'An error occurred';
+        final message =
+            json.decode(response.body)['message'] ?? 'An error occurred';
         Get.snackbar(
           "Error",
           message,
@@ -96,7 +115,6 @@ class FeedbackController extends GetxController {
         );
       }
     } catch (e) {
-      print('Error fetching feedback: $e');
       Get.snackbar(
         "Error",
         "Failed to get feedback data: $e",
@@ -108,12 +126,14 @@ class FeedbackController extends GetxController {
     }
   }
 
+  /// Add a new feedback entry
   Future<void> addFeedback({
     required String review,
     required int facultyInfoId,
     required int studentInfoId,
   }) async {
     isAddingFeedback.value = true;
+
     await internetController.checkConnection();
     if (!internetController.isConnected.value) {
       isAddingFeedback.value = false;
@@ -129,22 +149,26 @@ class FeedbackController extends GetxController {
     }
 
     try {
+      final url = Uri.parse(feedbackAdd);
+      final body = {
+        'review': review,
+        'faculty_info_id': facultyInfoId,
+        'student_info_id': studentInfoId,
+        'sem_info_id': semId
+      };
+
       final response = await http.post(
-        Uri.parse(feedbackAdd),
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': validApiKey,
         },
-        body: json.encode({
-          'review': review,
-          'faculty_info_id': facultyInfoId,
-          'student_info_id': studentInfoId,
-          'sem_info_id': semId
-        }),
+        body: json.encode(body),
       );
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body) as Map<String, dynamic>;
+
         if (responseData['status'] == true) {
           Get.snackbar(
             "Success",
@@ -152,9 +176,10 @@ class FeedbackController extends GetxController {
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
-          // Clear form after successful submission
+          // Reset form after success
           reviewController.clear();
           selectedFaculty.value = null;
+
           // Refresh feedback list
           fetchFeedbackList();
         } else {
@@ -166,7 +191,8 @@ class FeedbackController extends GetxController {
           );
         }
       } else {
-        final message = json.decode(response.body)['message'] ?? 'An error occurred';
+        final message =
+            json.decode(response.body)['message'] ?? 'An error occurred';
         Get.snackbar(
           "Error",
           message,
@@ -175,7 +201,6 @@ class FeedbackController extends GetxController {
         );
       }
     } catch (e) {
-      print('Error adding feedback: $e');
       Get.snackbar(
         "Error",
         "Failed to add feedback: $e",
@@ -187,8 +212,10 @@ class FeedbackController extends GetxController {
     }
   }
 
+  /// Fetch faculty list for the student
   Future<void> fetchFacultyList() async {
     isLoadingFacultyList.value = true;
+
     await internetController.checkConnection();
     if (!internetController.isConnected.value) {
       isLoadingFacultyList.value = false;
@@ -200,29 +227,39 @@ class FeedbackController extends GetxController {
     }
 
     try {
+      final url = Uri.parse(facultyListAPI);
+      final body = {'s_id': studentId};
+
       final response = await http.post(
-        Uri.parse(facultyListAPI),
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': validApiKey,
         },
-        body: json.encode({
-          's_id': studentId,
-        }),
+        body: json.encode(body),
       );
 
       if (response.statusCode == 200) {
-        final facultyList = json.decode(response.body) as List<dynamic>;
+        final jsonResponse = json.decode(response.body);
+
+        final facultyList = (jsonResponse['faculty_list'] as List<dynamic>);
+
+        // Parse faculty list into models
         facultyDataList.assignAll(
           facultyList.map((data) {
             try {
-              return FacultyListModel.fromJson(data);
+              return FacultyListModel.fromJson(data as Map<String, dynamic>);
             } catch (e) {
-              print('Error parsing faculty: $data, error: $e');
-              return null; // Skip invalid entries
+              return null;
             }
-          }).where((faculty) => faculty != null).cast<FacultyListModel>().toList(),
+          }).whereType<FacultyListModel>().toList(),
         );
+
+        // Auto-select the first faculty if available
+        if (facultyDataList.isNotEmpty && selectedFaculty.value == null) {
+          selectedFaculty.value = facultyDataList.first;
+        }
+
         if (facultyDataList.isEmpty) {
           Get.snackbar(
             "No Data",
@@ -232,7 +269,8 @@ class FeedbackController extends GetxController {
           );
         }
       } else {
-        final message = json.decode(response.body)['message'] ?? 'An error occurred';
+        final message =
+            json.decode(response.body)['message'] ?? 'An error occurred';
         Get.snackbar(
           "Error",
           message,
@@ -241,7 +279,6 @@ class FeedbackController extends GetxController {
         );
       }
     } catch (e) {
-      print('Error fetching faculty list: $e');
       Get.snackbar(
         "Error",
         "Failed to get faculty data: $e",
@@ -253,7 +290,7 @@ class FeedbackController extends GetxController {
     }
   }
 
-  // Toggle expansion state for feedback items
+  /// Toggle expanded/collapsed state for a feedback review
   void toggleReviewExpansion(int feedbackId) {
     expandedReviews[feedbackId] = !(expandedReviews[feedbackId] ?? false);
   }
