@@ -21,19 +21,21 @@ class FeedbackScreen extends GetView<FeedbackController> {
   Widget build(BuildContext context) {
     final FocusNode focusNode = FocusNode();
 
+    /// Format date from API into `dd-MM-yyyy`
     String? formatDate(String? dateStr) {
       if (dateStr == null || dateStr.isEmpty) return null;
       DateTime dateTime = DateTime.parse(dateStr);
       return DateFormat('dd-MM-yyyy').format(dateTime);
     }
 
+    /// Format time from API into `hh:mm a`
     String? formatTime(String? dateStr) {
       if (dateStr == null || dateStr.isEmpty) return null;
       DateTime dateTime = DateTime.parse(dateStr);
       return DateFormat('hh:mm a').format(dateTime);
     }
 
-    // Show confirmation dialog for submitting feedback
+    /// Show confirmation dialog before submitting feedback
     void showConfirmationDialog() {
       if (controller.selectedFaculty.value == null) {
         Get.snackbar(
@@ -44,6 +46,7 @@ class FeedbackScreen extends GetView<FeedbackController> {
         );
         return;
       }
+
       ArtSweetAlert.show(
         context: context,
         artDialogArgs: ArtDialogArgs(
@@ -56,31 +59,28 @@ class FeedbackScreen extends GetView<FeedbackController> {
           cancelButtonText: "Cancel",
           confirmButtonColor: muColor,
           onConfirm: () async {
-            Get.back();
+            Get.back(); // Close the dialog
             await controller.addFeedback(
               review: controller.reviewController.text,
               facultyInfoId: controller.selectedFaculty.value!.facultyId,
               studentInfoId: controller.studentId,
             );
           },
-          onCancel: () {},
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Anonymous Feedback",
-          style: appbarStyle(context),
-        ),
+        title: Text("Anonymous Feedback", style: appbarStyle(context)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded, color: backgroundColor),
           onPressed: () => Get.back(),
         ),
       ),
       body: Obx(
-            () => controller.isLoadingFeedbackList.value || controller.isLoadingFacultyList.value
+            () => controller.isLoadingFeedbackList.value ||
+            controller.isLoadingFacultyList.value
             ? const AdaptiveLoadingScreen()
             : AdaptiveRefreshIndicator(
           onRefresh: () => controller.fetchFeedbackList(),
@@ -91,9 +91,13 @@ class FeedbackScreen extends GetView<FeedbackController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Heading1(text: "Submit Feedback", fontSize: 2.5, leftPadding: 0),
+                  const Heading1(
+                      text: "Submit Feedback",
+                      fontSize: 2.5,
+                      leftPadding: 0),
                   const SizedBox(height: 20),
-                  // Faculty Dropdown
+
+                  /// Faculty Selection Dropdown
                   Obx(
                         () => DropdownButtonFormField<FacultyListModel>(
                       value: controller.selectedFaculty.value,
@@ -151,19 +155,23 @@ class FeedbackScreen extends GetView<FeedbackController> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Review TextField
+
+                  /// Review Text Field
                   Obx(
                         () => TextField(
                       controller: controller.reviewController,
                       focusNode: focusNode,
                       cursorColor: muColor,
-                      enabled: controller.selectedFaculty.value != null, // Enable only if faculty is selected
+                      enabled: controller.selectedFaculty.value != null,
                       decoration: InputDecoration(
                         labelText: "Review",
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        floatingLabelBehavior:
+                        FloatingLabelBehavior.never,
                         labelStyle: TextStyle(
                           fontFamily: "mu_reg",
-                          color: focusNode.hasFocus ? muColor : muGrey3,
+                          color: focusNode.hasFocus
+                              ? muColor
+                              : muGrey3,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -177,7 +185,8 @@ class FeedbackScreen extends GetView<FeedbackController> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: muGrey3.withOpacity(0.5)),
+                          borderSide: BorderSide(
+                              color: muGrey3.withOpacity(0.5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -189,13 +198,13 @@ class FeedbackScreen extends GetView<FeedbackController> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Submit Button
+
+                  /// Submit Button
                   Obx(
                         () => ElevatedButton(
-                      onPressed: controller.canSubmit.value && !controller.isAddingFeedback.value
-                          ? () {
-                        showConfirmationDialog();
-                      }
+                      onPressed: controller.canSubmit.value &&
+                          !controller.isAddingFeedback.value
+                          ? showConfirmationDialog
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: muColor,
@@ -217,131 +226,184 @@ class FeedbackScreen extends GetView<FeedbackController> {
                     height: 30,
                     child: Divider(color: muGrey2),
                   ),
-                  const Heading1(text: "Feedback History", fontSize: 2.5, leftPadding: 0),
+                  const Heading1(
+                      text: "Feedback History",
+                      fontSize: 2.5,
+                      leftPadding: 0),
                   const SizedBox(height: 10),
+
+                  /// Feedback History List
                   Obx(
                         () => controller.feedbackDataList.isNotEmpty
                         ? ListView.builder(
                       shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.feedbackDataList.length,
+                      physics:
+                      const NeverScrollableScrollPhysics(),
+                      itemCount:
+                      controller.feedbackDataList.length,
                       itemBuilder: (context, index) {
-                        final feedback = controller.feedbackDataList[index];
-                        String? dateStr = formatDate(feedback.feedbackDate);
-                        String? timeStr = formatTime(feedback.feedbackDate);
+                        final feedback =
+                        controller.feedbackDataList[index];
+                        String? dateStr =
+                        formatDate(feedback.feedbackDate);
+                        String? timeStr =
+                        formatTime(feedback.feedbackDate);
 
                         return SlideZoomInAnimation(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+                            padding: const EdgeInsets.fromLTRB(
+                                0, 5, 0, 10),
                             child: Stack(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding:
+                                  const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: muGrey,
-                                    borderRadius: BorderRadius.circular(borderRad),
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        borderRad),
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                     children: [
+                                      /// Review text (expandable)
                                       Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment
+                                            .start,
                                         children: [
                                           HugeIcon(
-                                            icon: HugeIcons.strokeRoundedComment01,
+                                            icon: HugeIcons
+                                                .strokeRoundedComment01,
                                             color: muColor,
                                           ),
                                           const SizedBox(width: 7),
-                                          Expanded(
-                                            child: Obx(
-                                                  () {
-                                                bool isExpanded = controller
-                                                    .expandedReviews[
-                                                feedback.feedbackId] ??
-                                                    false;
-                                                bool needsExpansion =
-                                                    feedback.feedbackReview.length >
-                                                        50 ||
-                                                        feedback.feedbackReview
-                                                            .contains('\n');
+                                          Flexible(
+                                            child: Obx(() {
+                                              bool isExpanded =
+                                                  controller
+                                                      .expandedReviews[
+                                                  feedback
+                                                      .feedbackId] ??
+                                                      false;
+                                              bool needsExpansion =
+                                                  feedback
+                                                      .feedbackReview
+                                                      .length >
+                                                      50 ||
+                                                      feedback
+                                                          .feedbackReview
+                                                          .contains(
+                                                          '\n');
 
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    if (needsExpansion) {
-                                                      controller.toggleReviewExpansion(
-                                                          feedback.feedbackId);
-                                                    }
-                                                  },
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                    children: [
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  if (needsExpansion) {
+                                                    controller
+                                                        .toggleReviewExpansion(
+                                                        feedback
+                                                            .feedbackId);
+                                                  }
+                                                },
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                      const EdgeInsets.only(
+                                                          right:
+                                                          100),
+                                                      child: Text(
+                                                        "Review: ${feedback.feedbackReview}",
+                                                        maxLines: isExpanded
+                                                            ? null
+                                                            : 1,
+                                                        overflow: isExpanded
+                                                            ? null
+                                                            : TextOverflow
+                                                            .ellipsis,
+                                                        style:
+                                                        TextStyle(
+                                                          fontSize:
+                                                          getSize(
+                                                              context,
+                                                              2),
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    if (needsExpansion)
                                                       Padding(
-                                                        padding: const EdgeInsets.only(
-                                                            right: 100), // Prevent overlap with tag
+                                                        padding: const EdgeInsets
+                                                            .only(
+                                                            top: 2,
+                                                            right:
+                                                            100),
                                                         child: Text(
-                                                          "Review: ${feedback.feedbackReview}",
-                                                          maxLines: isExpanded ? null : 1,
-                                                          overflow: isExpanded
-                                                              ? null
-                                                              : TextOverflow.ellipsis,
-                                                          style: TextStyle(
-                                                            fontSize: getSize(context, 2),
-                                                            fontWeight: FontWeight.bold,
+                                                          isExpanded
+                                                              ? "show less"
+                                                              : "show more...",
+                                                          style:
+                                                          TextStyle(
+                                                            fontSize:
+                                                            getSize(context,
+                                                                1.8),
+                                                            color:
+                                                            muColor,
+                                                            fontWeight:
+                                                            FontWeight.bold,
                                                           ),
                                                         ),
                                                       ),
-                                                      if (needsExpansion)
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(
-                                                              top: 2, right: 100),
-                                                          child: Text(
-                                                            isExpanded
-                                                                ? "show less"
-                                                                : "show more...",
-                                                            style: TextStyle(
-                                                              fontSize:
-                                                              getSize(context, 1.8),
-                                                              color: muColor,
-                                                              fontWeight: FontWeight.bold,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
+                                                  ],
+                                                ),
+                                              );
+                                            }),
                                           ),
                                         ],
                                       ),
                                       const SizedBox(height: 5),
+
+                                      /// Faculty name
                                       Row(
                                         children: [
                                           HugeIcon(
-                                            icon: HugeIcons.strokeRoundedUser,
+                                            icon: HugeIcons
+                                                .strokeRoundedUser,
                                             color: muColor,
                                           ),
                                           const SizedBox(width: 7),
-                                          Text('To: ${feedback.feedbackFacultyName}',
+                                          Text(
+                                            'To: ${feedback.feedbackFacultyName}',
                                             style: TextStyle(
-                                              fontSize: getSize(context, 2),
+                                              fontSize: getSize(
+                                                  context, 2),
                                             ),
                                           ),
                                         ],
                                       ),
                                       const SizedBox(height: 5),
+
+                                      /// Date
                                       Row(
                                         children: [
                                           HugeIcon(
-                                            icon: HugeIcons.strokeRoundedCalendar03,
+                                            icon: HugeIcons
+                                                .strokeRoundedCalendar03,
                                             color: muColor,
                                           ),
                                           const SizedBox(width: 7),
                                           Text(
                                             dateStr ?? 'N/A',
                                             style: TextStyle(
-                                              fontSize: getSize(context, 2),
+                                              fontSize: getSize(
+                                                  context, 2),
                                             ),
                                           ),
                                         ],
@@ -349,28 +411,37 @@ class FeedbackScreen extends GetView<FeedbackController> {
                                     ],
                                   ),
                                 ),
+
+                                /// Status Tag (Viewed / Not Viewed)
                                 Align(
                                   alignment: Alignment.topRight,
                                   child: Container(
                                     width: 100,
                                     height: 25,
                                     decoration: BoxDecoration(
-                                      color: feedback.feedbackStatus == 0
+                                      color: feedback
+                                          .feedbackStatus ==
+                                          0
                                           ? Colors.amber
                                           : Colors.green,
-                                      borderRadius: const BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                        bottomLeft: Radius.circular(10),
+                                      borderRadius:
+                                      const BorderRadius.only(
+                                        topRight:
+                                        Radius.circular(10),
+                                        bottomLeft:
+                                        Radius.circular(10),
                                       ),
                                     ),
                                     child: Center(
                                       child: Text(
-                                        feedback.feedbackStatus == 0
+                                        feedback.feedbackStatus ==
+                                            0
                                             ? "Not Viewed"
                                             : "Viewed",
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: getSize(context, 1.8),
+                                          fontSize: getSize(
+                                              context, 1.8),
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
