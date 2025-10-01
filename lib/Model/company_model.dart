@@ -5,6 +5,7 @@ class CompanyModel {
   List<String> companyDomain; // now a list
   String companyWebsite;
   String companyLinkedin;
+  String aboutCompany;
 
   CompanyModel({
     required this.companyId,
@@ -13,6 +14,7 @@ class CompanyModel {
     required this.companyDomain,
     required this.companyWebsite,
     required this.companyLinkedin,
+    required this.aboutCompany,
   });
 
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class CompanyModel {
       companyDomain: (json['company_domain'] as String?)?.split(",").map((e) => e.trim()).toList() ?? [],
       companyWebsite: json['company_website'] ?? "",
       companyLinkedin: json['company_linkedin'] ?? "",
+      aboutCompany: json['about_company'] ?? ""
     );
   }
 
@@ -37,3 +40,4 @@ class CompanyModel {
     };
   }
 }
+
