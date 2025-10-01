@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../Helper/Components.dart';
 import '../../Model/company_model.dart';
 
-
 class CompanyDetailScreen extends StatelessWidget {
   final CompanyModel company; // Pass company object here
 
