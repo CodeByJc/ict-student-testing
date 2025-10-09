@@ -12,6 +12,7 @@ class JobMarketController extends GetxController {
   RxList<JobMarketInsight> insightsList = <JobMarketInsight>[].obs;
   RxBool isLoadingJobMarket = true.obs;
   RxString selectedCategory = 'All'.obs;
+  RxString selectedSuperDomain = 'Software'.obs; // 'Software' | 'Hardware'
 
   // Sample data for demonstration - in real app, this would come from API
   final List<JobMarketModel> _sampleJobMarketData = [
@@ -250,6 +251,145 @@ class JobMarketController extends GetxController {
         colorText: Colors.white,
       );
       // Fallback to sample on exception
+      jobMarketDataList.assignAll(_sampleJobMarketData);
+      insightsList.assignAll(_sampleInsights);
+    } finally {
+      isLoadingJobMarket.value = false;
+    }
+  }
+
+  Future<void> fetchJobMarketFromGemini({required String apiKey}) async {
+    isLoadingJobMarket.value = true;
+    await internetController.checkConnection();
+    if (!internetController.isConnected.value) {
+      isLoadingJobMarket.value = false;
+      Utils().showInternetAlert(
+        context: Get.context!,
+        onConfirm: () => fetchJobMarketFromGemini(apiKey: apiKey),
+      );
+      return;
+    }
+
+    try {
+      final uri = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$apiKey');
+
+      final prompt = {
+        'contents': [
+          {
+            'parts': [
+              {
+                'text':
+                    'Return STRICT JSON (no markdown, no code fences) describing India tech job market split into categories Software and Hardware. For each category provide a list of subdomains with fields: domain (string), category (\"Software\" or \"Hardware\"), market_share (number), growth_rate (number), total_jobs (int), average_salary (number, INR), description (short string), skills (array of 3-6 strings), future_outlook (short string), demand_level (1-5 int). Ensure top subdomains include cloud engineering, web development, mobile app development, data science, cybersecurity for Software; and VLSI, embedded systems, IoT hardware, PCB design for Hardware.'
+              }
+            ]
+          }
+        ],
+        'generationConfig': {
+          'temperature': 0.2,
+          'maxOutputTokens': 2048,
+        }
+      };
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(prompt),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final candidates = (data['candidates'] ?? []) as List<dynamic>;
+        if (candidates.isEmpty) {
+          jobMarketDataList.assignAll(_sampleJobMarketData);
+          insightsList.assignAll(_sampleInsights);
+          return;
+        }
+        final content = candidates.first['content'];
+        final parts = (content?['parts'] ?? []) as List<dynamic>;
+        final text = (parts.isNotEmpty ? parts.first['text'] : '') as String;
+
+        // Extract JSON from the text (in case model added extra text)
+        String jsonString = text.trim();
+        final firstBrace = jsonString.indexOf('{');
+        final firstBracket = jsonString.indexOf('[');
+        int start = -1;
+        if (firstBrace != -1 &&
+            (firstBrace < firstBracket || firstBracket == -1)) {
+          start = firstBrace;
+        } else if (firstBracket != -1) {
+          start = firstBracket;
+        }
+        if (start > 0) {
+          jsonString = jsonString.substring(start);
+        }
+        // Try parse as list or map
+        dynamic parsed;
+        try {
+          parsed = jsonDecode(jsonString);
+        } catch (_) {
+          // fallback to sample
+          jobMarketDataList.assignAll(_sampleJobMarketData);
+          insightsList.assignAll(_sampleInsights);
+          isLoadingJobMarket.value = false;
+          return;
+        }
+
+        List<dynamic> domainsRaw = [];
+        if (parsed is List) {
+          domainsRaw = parsed;
+        } else if (parsed is Map<String, dynamic>) {
+          final software = (parsed['Software'] ?? []) as List<dynamic>;
+          final hardware = (parsed['Hardware'] ?? []) as List<dynamic>;
+          domainsRaw = [...software, ...hardware];
+        }
+
+        final parsedDomains = domainsRaw
+            .map((e) {
+              try {
+                return JobMarketModel.fromJson(e as Map<String, dynamic>);
+              } catch (_) {
+                return null;
+              }
+            })
+            .whereType<JobMarketModel>()
+            .toList();
+
+        if (parsedDomains.isNotEmpty) {
+          jobMarketDataList.assignAll(parsedDomains);
+          // derive simple insights
+          insightsList.assignAll([
+            JobMarketInsight(
+              title: 'Top growth domains',
+              description: getTopGrowingDomains()
+                  .take(3)
+                  .map((e) => e.domain)
+                  .join(', '),
+              type: 'trend',
+              confidence: 0.85,
+            ),
+            JobMarketInsight(
+              title: 'Highest paying domains',
+              description: getHighestPayingDomains()
+                  .take(3)
+                  .map((e) => e.domain)
+                  .join(', '),
+              type: 'opportunity',
+              confidence: 0.8,
+            ),
+          ]);
+        } else {
+          jobMarketDataList.assignAll(_sampleJobMarketData);
+          insightsList.assignAll(_sampleInsights);
+        }
+      } else {
+        jobMarketDataList.assignAll(_sampleJobMarketData);
+        insightsList.assignAll(_sampleInsights);
+      }
+    } catch (e) {
+      print('Error fetching job market data (Gemini): $e');
       jobMarketDataList.assignAll(_sampleJobMarketData);
       insightsList.assignAll(_sampleInsights);
     } finally {

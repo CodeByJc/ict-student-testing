@@ -16,19 +16,50 @@ class LiveJobMarketScreen extends StatefulWidget {
 
 class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
   final JobMarketController controller = Get.find<JobMarketController>();
-  static const String _jobMarketApiKey =
-      "ak_40wwiabbaod23azznz64370wrdg6uq19bsld6vyq5gs114w";
-  // Replace with your live API endpoint if different
-  static const String _jobMarketApiUrl =
-      "https://market.ict-connect.example/api/job-market/live";
+  static const String _geminiApiKey = "AIzaSyDgmslsS8QSiemqfT9B-FHWpKUq_gGLjbQ";
 
   @override
   void initState() {
     super.initState();
     // Trigger initial load using inline API configuration
-    controller.fetchJobMarketData(
-      apiKey: _jobMarketApiKey,
-      apiUrl: _jobMarketApiUrl,
+    controller.fetchJobMarketFromGemini(apiKey: _geminiApiKey);
+  }
+
+  Widget _buildSuperDomainToggle() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildToggleButton('Software',
+                  controller.selectedSuperDomain.value == 'Software'),
+              const SizedBox(width: 8),
+              _buildToggleButton('Hardware',
+                  controller.selectedSuperDomain.value == 'Hardware'),
+            ],
+          )),
+    );
+  }
+
+  Widget _buildToggleButton(String label, bool isSelected) {
+    return GestureDetector(
+      onTap: () => controller.selectedSuperDomain.value = label,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? muColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: muColor),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : muColor,
+            fontWeight: FontWeight.w700,
+            fontFamily: "mu_reg",
+          ),
+        ),
+      ),
     );
   }
 
@@ -62,6 +93,7 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildSuperDomainToggle(),
               _buildHeaderCard(),
               const SizedBox(height: 20),
               _buildCategoryFilter(),
@@ -253,26 +285,31 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(() => SfCircularChart(
-                  series: <CircularSeries>[
-                    DoughnutSeries<JobMarketModel, String>(
-                      dataSource: controller.jobMarketDataList,
-                      xValueMapper: (JobMarketModel data, _) => data.domain,
-                      yValueMapper: (JobMarketModel data, _) =>
-                          data.marketShare,
-                      dataLabelSettings: const DataLabelSettings(
-                        isVisible: true,
-                        labelPosition: ChartDataLabelPosition.outside,
-                      ),
-                      enableTooltip: true,
+            Obx(() {
+              final filtered = controller.jobMarketDataList
+                  .where(
+                      (e) => e.category == controller.selectedSuperDomain.value)
+                  .toList();
+              return SfCircularChart(
+                series: <CircularSeries>[
+                  DoughnutSeries<JobMarketModel, String>(
+                    dataSource: filtered,
+                    xValueMapper: (JobMarketModel data, _) => data.domain!,
+                    yValueMapper: (JobMarketModel data, _) => data.marketShare,
+                    dataLabelSettings: const DataLabelSettings(
+                      isVisible: true,
+                      labelPosition: ChartDataLabelPosition.outside,
                     ),
-                  ],
-                  legend: const Legend(
-                    isVisible: true,
-                    position: LegendPosition.bottom,
-                    overflowMode: LegendItemOverflowMode.wrap,
+                    enableTooltip: true,
                   ),
-                )),
+                ],
+                legend: const Legend(
+                  isVisible: true,
+                  position: LegendPosition.bottom,
+                  overflowMode: LegendItemOverflowMode.wrap,
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -297,26 +334,31 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(() => SizedBox(
-                  height: 300,
-                  child: SfCartesianChart(
-                    primaryXAxis: const CategoryAxis(),
-                    primaryYAxis: const NumericAxis(
-                      title: AxisTitle(text: 'Growth Rate (%)'),
-                    ),
-                    series: <CartesianSeries>[
-                      ColumnSeries<JobMarketModel, String>(
-                        dataSource: controller.jobMarketDataList,
-                        xValueMapper: (JobMarketModel data, _) => data.domain,
-                        yValueMapper: (JobMarketModel data, _) =>
-                            data.growthRate,
-                        color: muColor,
-                        dataLabelSettings:
-                            const DataLabelSettings(isVisible: true),
-                      ),
-                    ],
+            Obx(() {
+              final filtered = controller.jobMarketDataList
+                  .where(
+                      (e) => e.category == controller.selectedSuperDomain.value)
+                  .toList();
+              return SizedBox(
+                height: 300,
+                child: SfCartesianChart(
+                  primaryXAxis: const CategoryAxis(),
+                  primaryYAxis: const NumericAxis(
+                    title: AxisTitle(text: 'Growth Rate (%)'),
                   ),
-                )),
+                  series: <CartesianSeries>[
+                    ColumnSeries<JobMarketModel, String>(
+                      dataSource: filtered,
+                      xValueMapper: (JobMarketModel data, _) => data.domain!,
+                      yValueMapper: (JobMarketModel data, _) => data.growthRate,
+                      color: muColor,
+                      dataLabelSettings:
+                          const DataLabelSettings(isVisible: true),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -341,27 +383,33 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(() => SizedBox(
-                  height: 300,
-                  child: SfCartesianChart(
-                    primaryXAxis: const CategoryAxis(),
-                    primaryYAxis: NumericAxis(
-                      title: AxisTitle(text: 'Salary (₹)'),
-                      numberFormat: NumberFormat.compact(),
-                    ),
-                    series: <CartesianSeries>[
-                      BarSeries<JobMarketModel, String>(
-                        dataSource: controller.jobMarketDataList,
-                        xValueMapper: (JobMarketModel data, _) => data.domain,
-                        yValueMapper: (JobMarketModel data, _) =>
-                            data.averageSalary,
-                        color: const Color(0xFF4CAF50),
-                        dataLabelSettings:
-                            const DataLabelSettings(isVisible: true),
-                      ),
-                    ],
+            Obx(() {
+              final filtered = controller.jobMarketDataList
+                  .where(
+                      (e) => e.category == controller.selectedSuperDomain.value)
+                  .toList();
+              return SizedBox(
+                height: 300,
+                child: SfCartesianChart(
+                  primaryXAxis: const CategoryAxis(),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'Salary (₹)'),
+                    numberFormat: NumberFormat.compact(),
                   ),
-                )),
+                  series: <CartesianSeries>[
+                    BarSeries<JobMarketModel, String>(
+                      dataSource: filtered,
+                      xValueMapper: (JobMarketModel data, _) => data.domain!,
+                      yValueMapper: (JobMarketModel data, _) =>
+                          data.averageSalary,
+                      color: const Color(0xFF4CAF50),
+                      dataLabelSettings:
+                          const DataLabelSettings(isVisible: true),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -386,15 +434,21 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(() => ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.jobMarketDataList.length,
-                  itemBuilder: (context, index) {
-                    final job = controller.jobMarketDataList[index];
-                    return _buildJobDomainCard(job);
-                  },
-                )),
+            Obx(() {
+              final filtered = controller.jobMarketDataList
+                  .where(
+                      (e) => e.category == controller.selectedSuperDomain.value)
+                  .toList();
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filtered.length,
+                itemBuilder: (context, index) {
+                  final job = filtered[index];
+                  return _buildJobDomainCard(job);
+                },
+              );
+            }),
           ],
         ),
       ),
