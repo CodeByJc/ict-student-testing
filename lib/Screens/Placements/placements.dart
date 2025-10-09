@@ -114,9 +114,12 @@ class PlacementScreen extends GetView<PlacementController> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: muGrey,
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFE3F2FD), Colors.white],
+                            ),
                             borderRadius: BorderRadius.circular(10),
                           ),
+
                           width: double.infinity,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +190,7 @@ class PlacementScreen extends GetView<PlacementController> {
                             ),
                           ),
                         ),
-                  
+
                       ],
                     ),
                   ),
