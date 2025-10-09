@@ -6,9 +6,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:ict_mu_students/Helper/Components.dart';
-import 'package:ict_mu_students/Helper/size.dart';
 import 'package:ict_mu_students/Model/holiday_list_model.dart';
-import 'package:ict_mu_students/Widgets/dashboard_icon.dart';
 import '../../Helper/colors.dart';
 import '../../Model/user_data_model.dart';
 import '../../Network/API.dart';
@@ -42,146 +40,238 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Dashboard",
-            style: TextStyle(
-                color: Colors.black, fontFamily: "mu_reg", fontSize: 23)),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            blackTag(
-                context,
-                Dark1,
-                "${userData.studentDetails?.firstName} ${userData.studentDetails?.lastName}",
-                "Sem: ${userData.classDetails?.semester}  Class: ${userData.classDetails?.className} - ${userData.classDetails?.batch?.toUpperCase()}",
-                CachedNetworkImage(
-                  imageUrl: studentImageAPI(userData.studentDetails!.grNo),
-                  placeholder: (context, url) =>  HugeIcon(
-                    icon: HugeIcons.strokeRoundedUser,
-                    size: 30,
-                    color: Colors.black,
-                  ),
-                  errorWidget: (context, url, error) =>  HugeIcon(
-                    icon: HugeIcons.strokeRoundedUser,
-                    size: 30,
-                    color: Colors.black,
-                  ),
-                  fit: BoxFit.cover,
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: blackTag(
+              context,
+              muColor,
+              "${userData.studentDetails?.firstName} ${userData.studentDetails?.lastName}",
+              "Sem: ${userData.classDetails?.semester}  Class: ${userData.classDetails?.className} - ${userData.classDetails?.batch?.toUpperCase()}",
+              CachedNetworkImage(
+                imageUrl: studentImageAPI(userData.studentDetails!.grNo),
+                placeholder: (context, url) => const HugeIcon(
+                  icon: HugeIcons.strokeRoundedUser,
+                  size: 20,
+                  color: Colors.black87,
                 ),
-                true,
-                '/profile',
-                userData),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: SizedBox(
-                height: 450,
-                width: double.infinity,
-                // color: Colors.red,
-                child: GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 5,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.85,
-                  padding: const EdgeInsets.all(10),
-                  children: [
-                    TapIcon(
-                        name: "Attendance",
-                        iconData: HugeIcons.strokeRoundedDocumentValidation,
-                        route: "/attendance",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId
-                        }),
-                    TapIcon(
-                        name: "Timetable",
-                        iconData: HugeIcons.strokeRoundedCalendar02,
-                        route: "/studentTimetable",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId
-                        }),
-                    TapIcon(
-                        name: "Examination",
-                        iconData: HugeIcons.strokeRoundedDocumentValidation,
-                        route: "/examList",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId
-                        }),
-                    const TapIcon(
-                        name: "Holidays",
-                        iconData: HugeIcons.strokeRoundedSun01,
-                        route: "/holidayList"),
-
-                    TapIcon(
-                        name: "Placements",
-                        iconData: HugeIcons.strokeRoundedGraduationScroll,
-                        route: "/placements",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId,
-                          'batch_id': userData.studentDetails?.batchId
-                        }),
-                    TapIcon(
-                        name: "Leave",
-                        iconData: HugeIcons.strokeRoundedMessageUser01,
-                        route: "/leave",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId
-                        }),
-                    const TapIcon(
-                        name: "Events",
-                        iconData: HugeIcons.strokeRoundedRanking,
-                        route: "/events",
-                        ),
-                    TapIcon(
-                        name: "Anonymous Feedback",
-                        iconData: HugeIcons.strokeRoundedBubbleChatSecure,
-                        route: "/feedback",
-                        routeArg: {
-                          'student_id': userData.studentDetails?.studentId,
-                          'sem_id':userData.classDetails?.semId
-                        }),
-                  ],
+                errorWidget: (context, url, error) => const HugeIcon(
+                  icon: HugeIcons.strokeRoundedUser,
+                  size: 20,
+                  color: Colors.black87,
                 ),
+                fit: BoxFit.cover,
+              ),
+              true,
+              '/profile',
+              userData,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.count(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio:
+                    0.9, // Slightly adjusted for better fit in 3x3
+                padding: const EdgeInsets.all(10),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: false,
+                children: [
+                  _buildGridIcon(
+                    name: "Attendance",
+                    iconData: HugeIcons.strokeRoundedDocumentValidation,
+                    route: "/attendance",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Timetable",
+                    iconData: HugeIcons.strokeRoundedCalendar02,
+                    route: "/studentTimetable",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Examination",
+                    iconData: HugeIcons.strokeRoundedDocumentValidation,
+                    route: "/examList",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Holidays",
+                    iconData: HugeIcons.strokeRoundedSun01,
+                    route: "/holidayList",
+                  ),
+                  _buildGridIcon(
+                    name: "Placements",
+                    iconData: HugeIcons.strokeRoundedGraduationScroll,
+                    route: "/placements",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId,
+                      'batch_id': userData.studentDetails?.batchId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Leave",
+                    iconData: HugeIcons.strokeRoundedMessageUser01,
+                    route: "/leave",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Events",
+                    iconData: HugeIcons.strokeRoundedRanking,
+                    route: "/events",
+                  ),
+                  _buildGridIcon(
+                    name: "Anonymous Feedback",
+                    iconData: HugeIcons.strokeRoundedBubbleChatSecure,
+                    route: "/feedback",
+                    routeArg: {
+                      'student_id': userData.studentDetails?.studentId,
+                      'sem_id': userData.classDetails?.semId
+                    },
+                  ),
+                  _buildGridIcon(
+                    name: "Live Job Market",
+                    iconData: HugeIcons.strokeRoundedRanking,
+                    route: "/liveJobMarket",
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            InkWell(
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: InkWell(
               onTap: () => Get.toNamed("/holidayList"),
-              highlightColor: backgroundColor,
-              child: Align(
-                alignment: Alignment.centerLeft,
+              borderRadius: BorderRadius.circular(16),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Container(
-                  width: getWidth(context, 0.7),
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                      color: muGrey,
-                      borderRadius: BorderRadius.horizontal(
-                          right: Radius.circular(borderRad * 2))),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 10, 10),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              HugeIcons.strokeRoundedSun01,
+                              color: Color(0xFF0098B5),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Upcoming Holiday",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                fontFamily: "mu_reg",
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (upcomingHoliday.holidayDate.isNotEmpty)
+                          Text(
+                            "${DateFormat('dd-MM-yyyy').format(DateTime.parse(upcomingHoliday.holidayDate))} - ${upcomingHoliday.holidayName}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF0098B5),
+                              fontFamily: "mu_reg",
+                            ),
+                          )
+                        else
                           const Text(
-                            "Upcoming Holiday : ",
+                            "No upcoming holidays",
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              color: Colors.grey,
+                              fontFamily: "mu_reg",
+                            ),
                           ),
-                          if (upcomingHoliday.holidayDate.isNotEmpty)
-                            Text(
-                                "${DateFormat('dd-MM-yyyy').format(DateTime.parse(upcomingHoliday.holidayDate))} - ${upcomingHoliday.holidayName}",
-                                style: TextStyle(fontSize: 17, color: muColor)),
-                        ]),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 
-          ],
+  Widget _buildGridIcon({
+    required String name,
+    required IconData iconData,
+    required String route,
+    Map<String, dynamic>? routeArg,
+  }) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(route, arguments: routeArg),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE3F2FD), Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              HugeIcon(
+                icon: iconData,
+                size: 28, // Further decreased for better fit
+                color: const Color(0xFF0098B5),
+              ),
+              const SizedBox(height: 6),
+              Flexible(
+                child: Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16, // Slightly smaller font for better fit
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    fontFamily: "mu_reg",
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
