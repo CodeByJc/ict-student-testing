@@ -94,9 +94,9 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSuperDomainToggle(),
-              _buildHeaderCard(),
-              const SizedBox(height: 20),
-              _buildCategoryFilter(),
+              //_buildHeaderCard(),
+              //const SizedBox(height: 20),
+              //_buildCategoryFilter(),
               const SizedBox(height: 20),
               _buildMarketOverview(),
               const SizedBox(height: 20),
@@ -114,158 +114,158 @@ class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
     );
   }
 
-  Widget _buildHeaderCard() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [muColor, Color(0xFF0098B5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const HugeIcon(
-                  icon: HugeIcons.strokeRoundedRanking,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  "Live Job Market Insights",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "mu_reg",
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Real-time data on India's tech job market across software and hardware domains",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 14,
-                fontFamily: "mu_reg",
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildStatCard(
-                    "Total Jobs", "${controller.getTotalJobs()}", Icons.work),
-                const SizedBox(width: 16),
-                _buildStatCard("Domains",
-                    "${controller.jobMarketDataList.length}", Icons.category),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildHeaderCard() {
+  //   return Card(
+  //     elevation: 4,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         gradient: LinearGradient(
+  //           colors: [muColor, Color(0xFF0098B5)],
+  //           begin: Alignment.topLeft,
+  //           end: Alignment.bottomRight,
+  //         ),
+  //         borderRadius: BorderRadius.circular(16),
+  //       ),
+  //       padding: const EdgeInsets.all(20),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               const HugeIcon(
+  //                 icon: HugeIcons.strokeRoundedRanking,
+  //                 color: Colors.white,
+  //                 size: 24,
+  //               ),
+  //               const SizedBox(width: 12),
+  //               const Text(
+  //                 "Live Job Market Insights",
+  //                 style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontSize: 20,
+  //                   fontWeight: FontWeight.bold,
+  //                   fontFamily: "mu_reg",
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 12),
+  //           Text(
+  //             "Real-time data on India's tech job market across software and hardware domains",
+  //             style: TextStyle(
+  //               color: Colors.white.withOpacity(0.9),
+  //               fontSize: 14,
+  //               fontFamily: "mu_reg",
+  //             ),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Row(
+  //             children: [
+  //               _buildStatCard(
+  //                   "Total Jobs", "${controller.getTotalJobs()}", Icons.work),
+  //               const SizedBox(width: 16),
+  //               _buildStatCard("Domains",
+  //                   "${controller.jobMarketDataList.length}", Icons.category),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: "mu_reg",
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 12,
-                fontFamily: "mu_reg",
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildStatCard(String label, String value, IconData icon) {
+  //   return Expanded(
+  //     child: Container(
+  //       padding: const EdgeInsets.all(12),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white.withOpacity(0.2),
+  //         borderRadius: BorderRadius.circular(8),
+  //       ),
+  //       child: Column(
+  //         children: [
+  //           Icon(icon, color: Colors.white, size: 20),
+  //           const SizedBox(height: 4),
+  //           Text(
+  //             value,
+  //             style: const TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 18,
+  //               fontWeight: FontWeight.bold,
+  //               fontFamily: "mu_reg",
+  //             ),
+  //           ),
+  //           Text(
+  //             label,
+  //             style: TextStyle(
+  //               color: Colors.white.withOpacity(0.8),
+  //               fontSize: 12,
+  //               fontFamily: "mu_reg",
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildCategoryFilter() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Filter by Category",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: "mu_reg",
-              ),
-            ),
-            const SizedBox(height: 12),
-            Obx(() => Row(
-                  children: [
-                    _buildFilterChip(
-                        "All", controller.selectedCategory.value == "All"),
-                    const SizedBox(width: 8),
-                    _buildFilterChip("Software",
-                        controller.selectedCategory.value == "Software"),
-                    const SizedBox(width: 8),
-                    _buildFilterChip("Hardware",
-                        controller.selectedCategory.value == "Hardware"),
-                  ],
-                )),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildCategoryFilter() {
+  //   return Card(
+  //     elevation: 2,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Text(
+  //             "Filter by Category",
+  //             style: TextStyle(
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.bold,
+  //               fontFamily: "mu_reg",
+  //             ),
+  //           ),
+  //           const SizedBox(height: 12),
+  //           Obx(() => Row(
+  //                 children: [
+  //                   _buildFilterChip(
+  //                       "All", controller.selectedCategory.value == "All"),
+  //                   const SizedBox(width: 8),
+  //                   _buildFilterChip("Software",
+  //                       controller.selectedCategory.value == "Software"),
+  //                   const SizedBox(width: 8),
+  //                   _buildFilterChip("Hardware",
+  //                       controller.selectedCategory.value == "Hardware"),
+  //                 ],
+  //               )),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return GestureDetector(
-      onTap: () => controller.filterByCategory(label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? muColor : Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontFamily: "mu_reg",
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildFilterChip(String label, bool isSelected) {
+  //   return GestureDetector(
+  //     onTap: () => controller.filterByCategory(label),
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //       decoration: BoxDecoration(
+  //         color: isSelected ? muColor : Colors.grey[200],
+  //         borderRadius: BorderRadius.circular(20),
+  //       ),
+  //       child: Text(
+  //         label,
+  //         style: TextStyle(
+  //           color: isSelected ? Colors.white : Colors.black87,
+  //           fontWeight: FontWeight.w600,
+  //           fontFamily: "mu_reg",
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildMarketOverview() {
     return Card(
