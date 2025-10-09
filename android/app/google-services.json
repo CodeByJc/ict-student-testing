@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "819772531199",
+    "firebase_url": "https://mu-ict-default-rtdb.firebaseio.com",
+    "project_id": "mu-ict",
+    "storage_bucket": "mu-ict.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819772531199:android:fb0dd40ddf7bdfa63847ca",
+        "android_client_info": {
+          "package_name": "com.ictmu.ict_mu_parents"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvTIdyQCWhtXtht3-txvrtZJ7ErES_SyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819772531199:android:f8b4082bfc1c39e23847ca",
+        "android_client_info": {
+          "package_name": "com.ictmu.ict_mu_students"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvTIdyQCWhtXtht3-txvrtZJ7ErES_SyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
