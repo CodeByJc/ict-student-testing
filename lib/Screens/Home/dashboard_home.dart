@@ -12,6 +12,7 @@ import '../../Model/user_data_model.dart';
 import '../../Network/API.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import '../CareerGuidance/career_guidance_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -75,12 +76,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.count(
                 crossAxisCount: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio:
-                    0.9, // Slightly adjusted for better fit in 3x3
-                padding: const EdgeInsets.all(10),
-                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 0.95,
+                padding: const EdgeInsets.all(8),
+                physics: const AlwaysScrollableScrollPhysics(),
                 shrinkWrap: false,
                 children: [
                   _buildGridIcon(
@@ -142,6 +142,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'student_id': userData.studentDetails?.studentId,
                       'sem_id': userData.classDetails?.semId
                     },
+                  ),
+                  _buildGridIcon(
+                    name: "Career Guidance",
+                    iconData: HugeIcons.strokeRoundedGraduationScroll,
+                    route: "/careerGuidance",
                   ),
                   _buildGridIcon(
                     name: "Live Job Market",
@@ -233,7 +238,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Map<String, dynamic>? routeArg,
   }) {
     return GestureDetector(
-      onTap: () => Get.toNamed(route, arguments: routeArg),
+      onTap: () {
+        if (route == "/careerGuidance") {
+          Get.to(() => const CareerGuidanceScreen());
+        } else {
+          Get.toNamed(route, arguments: routeArg);
+        }
+      },
       child: Card(
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -263,7 +274,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 16, // Slightly smaller font for better fit
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
                     fontFamily: "mu_reg",

@@ -16,6 +16,21 @@ class LiveJobMarketScreen extends StatefulWidget {
 
 class _LiveJobMarketScreenState extends State<LiveJobMarketScreen> {
   final JobMarketController controller = Get.find<JobMarketController>();
+  static const String _jobMarketApiKey =
+      "ak_40wwiabbaod23azznz64370wrdg6uq19bsld6vyq5gs114w";
+  // Replace with your live API endpoint if different
+  static const String _jobMarketApiUrl =
+      "https://market.ict-connect.example/api/job-market/live";
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger initial load using inline API configuration
+    controller.fetchJobMarketData(
+      apiKey: _jobMarketApiKey,
+      apiUrl: _jobMarketApiUrl,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

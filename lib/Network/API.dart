@@ -13,11 +13,12 @@ const String API_BASE_URL = "$host$serverPath";
 // Example usage
 String validateLoginAPI = "$API_BASE_URL/Student/login";
 
-
 // App info
 String currentVersion = "1.0";
 String validApiKey = "ictmu";
 String updateURL = 'https://devanpatel28.blogspot.com/';
+
+// (Removed) Live Job Market: now configured directly in screen
 
 // ====================== AUTHENTICATION ======================
 String updatePasswordAPI = '$host$serverPath/Password/updatePassword';

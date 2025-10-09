@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../Helper/Utils.dart';
 import '../Model/job_market_model.dart';
 import 'internet_connectivity.dart';
@@ -152,13 +154,9 @@ class JobMarketController extends GetxController {
     ),
   ];
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchJobMarketData();
-  }
+  // The screen should call fetchJobMarketData with API info
 
-  Future<void> fetchJobMarketData() async {
+  Future<void> fetchJobMarketData({String? apiKey, String? apiUrl}) async {
     isLoadingJobMarket.value = true;
     await internetController.checkConnection();
 
@@ -166,19 +164,83 @@ class JobMarketController extends GetxController {
       isLoadingJobMarket.value = false;
       Utils().showInternetAlert(
         context: Get.context!,
-        onConfirm: () => fetchJobMarketData(),
+        onConfirm: () => fetchJobMarketData(apiKey: apiKey, apiUrl: apiUrl),
       );
       return;
     }
 
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
+      // If API details are not provided, fall back to local sample
+      if (apiKey == null ||
+          apiUrl == null ||
+          apiKey.isEmpty ||
+          apiUrl.isEmpty) {
+        jobMarketDataList.assignAll(_sampleJobMarketData);
+        insightsList.assignAll(_sampleInsights);
+        return;
+      }
 
-      // In a real app, you would make an API call here
-      // For now, we'll use sample data
-      jobMarketDataList.assignAll(_sampleJobMarketData);
-      insightsList.assignAll(_sampleInsights);
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': apiKey,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic responseData = json.decode(response.body);
+
+        List<dynamic> domainsRaw = [];
+        List<dynamic> insightsRaw = [];
+
+        if (responseData is List) {
+          domainsRaw = responseData;
+        } else if (responseData is Map<String, dynamic>) {
+          // Try common shapes
+          final data = responseData['data'] ?? responseData;
+          domainsRaw = (data['domains'] ??
+              data['jobs'] ??
+              data['items'] ??
+              data) as List<dynamic>;
+          insightsRaw = (data['insights'] ?? []) as List<dynamic>;
+        }
+
+        final parsedDomains = domainsRaw
+            .map((e) {
+              try {
+                return JobMarketModel.fromJson(e as Map<String, dynamic>);
+              } catch (_) {
+                return null;
+              }
+            })
+            .whereType<JobMarketModel>()
+            .toList();
+
+        final parsedInsights = insightsRaw
+            .map((e) {
+              try {
+                return JobMarketInsight.fromJson(e as Map<String, dynamic>);
+              } catch (_) {
+                return null;
+              }
+            })
+            .whereType<JobMarketInsight>()
+            .toList();
+
+        if (parsedDomains.isNotEmpty) {
+          jobMarketDataList.assignAll(parsedDomains);
+          insightsList.assignAll(parsedInsights);
+        } else {
+          // Fallback to sample if response empty/unexpected
+          jobMarketDataList.assignAll(_sampleJobMarketData);
+          insightsList.assignAll(_sampleInsights);
+        }
+      } else {
+        // Fallback on non-200
+        jobMarketDataList.assignAll(_sampleJobMarketData);
+        insightsList.assignAll(_sampleInsights);
+      }
     } catch (e) {
       print('Error fetching job market data: $e');
       Get.snackbar(
@@ -187,6 +249,9 @@ class JobMarketController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      // Fallback to sample on exception
+      jobMarketDataList.assignAll(_sampleJobMarketData);
+      insightsList.assignAll(_sampleInsights);
     } finally {
       isLoadingJobMarket.value = false;
     }
