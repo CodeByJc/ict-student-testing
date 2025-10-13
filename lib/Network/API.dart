@@ -8,10 +8,8 @@ const String host = "https://publicly-awake-cricket.ngrok-free.app";
 const String serverPath = "/ict-server-testing/api/index.php";
 
 // build the base URL
-const String API_BASE_URL = "$host$serverPath";
-
-// Example usage
-String validateLoginAPI = "$API_BASE_URL/Student/login";
+const String API_BASE_URL = "$host$serverPath";// Example usage
+String validateLoginAPI = "$host$serverPath/Student/login";
 
 
 // App info
@@ -30,9 +28,8 @@ String totalAttendanceAPI = '$host$serverPath/Attendance/TotalAttendance';
 String attendanceByDateAPI = '$host$serverPath/Attendance/AttendanceByDate';
 
 // ====================== PARENT / FACULTY ======================
-String facultyContactAPI = '$host$serverPath/Parent/getFacultyContact';
+String facultyContactAPI = '$host$serverPath/Faculty/getFacultyListByStudent';
 String timetableAPI = '$host$serverPath/Parent/getStudentTimetable';
-String getmentorAPI = '$host$serverPath/Faculty/getMentorByStudent';
 
 // ====================== EXAM ======================
 String examListAPI = '$host$serverPath/Exam/getExamList';
@@ -57,6 +54,16 @@ String leaveHistoryAPI = '$host$serverPath/Leave/getLeaveHistory';
 
 // ====================== INTERVIEW BANK ======================
 String interviewBankListAPI = '$host$serverPath/InterviewBank/list';
+String interviewBankCreateAPI = "$host$serverPath/InterviewBank/create";
+String interviewBankGetAPI = "$host$serverPath/InterviewBank/get"; // append &id=
+String interviewBankUpdateAPI = "$host$serverPath/InterviewBank/update"; // append &id=
+String interviewBankDeleteAPI = "$host$serverPath/InterviewBank/delete"; // append &id=
+
+
+String announcementListAPI = '$host$serverPath/Announcement/list';
+
+
+
 
 // ====================== EVENTS ======================
 String eventListAPI = '$host$serverPath/Event/list';
