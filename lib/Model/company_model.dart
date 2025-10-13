@@ -10,7 +10,7 @@ class CompanyModel {
   CompanyModel({
     required this.companyId,
     required this.companyName,
-    required this.companyType,
+    required this.companyType,  
     required this.companyDomain,
     required this.companyWebsite,
     required this.companyLinkedin,
@@ -37,7 +37,7 @@ class CompanyModel {
       'company_domain': companyDomain.join(", "),
       'company_website': companyWebsite,
       'company_linkedin': companyLinkedin,
+      'about_company': aboutCompany,
     };
   }
 }
-

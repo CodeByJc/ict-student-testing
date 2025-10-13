@@ -1,52 +1,67 @@
 import 'dart:convert';
 
 class CampusDriveStudentModel {
-  int studentCurrentRoundId;
+  int? studentCurrentRoundId;
   String companyName;
-  String studentCurrentRoundName;
-  int studentCurrentRoundIndex;
-  String studentCurrentRoundMode;
-  String studentCurrentRoundStatus;
-  List<CompanyRoundsModel> rounds;
+  List<CompanyRoundModel> rounds;
+  String? status;
+  String? date;
+  String? time;
+  String? package;
+  String? location;
+  String? otherInfo;
+  int? batchInfoId;
+  String? companyType;
+  String? companyWebsite;
+  String? companyLinkedin;
 
   CampusDriveStudentModel({
-    required this.studentCurrentRoundId,
+    this.studentCurrentRoundId,
     required this.companyName,
-    required this.studentCurrentRoundName,
-    required this.studentCurrentRoundIndex,
-    required this.studentCurrentRoundMode,
-    required this.studentCurrentRoundStatus,
     required this.rounds,
+    this.status,
+    this.date,
+    this.time,
+    this.package,
+    this.location,
+    this.otherInfo,
+    this.batchInfoId,
+    this.companyType,
+    this.companyWebsite,
+    this.companyLinkedin,
   });
 
   factory CampusDriveStudentModel.fromJson(Map<String, dynamic> json) {
-    // Parse the rounds_details string if it exists
-    List<CompanyRoundsModel> roundsList = [];
-    if (json['company_rounds'] != null) {
+    List<CompanyRoundModel> roundsList = [];
+
+    // Parse nested rounds_details JSON
+    if (json['rounds_details'] != null) {
       try {
-        // Decode the rounds_details string into a JSON object
-        final roundsDetailsString = json['company_rounds'] as String;
-        final roundsDetailsJson = jsonDecode(roundsDetailsString);
-
-        // Extract the 'rounds' field (which is a string) and decode it into a list
-        final roundsString = roundsDetailsJson['rounds'] as String;
-        final roundsJson = jsonDecode(roundsString) as List<dynamic>;
-
-        // Map the list to RoundsModel objects
-        roundsList = roundsJson.map((round) => CompanyRoundsModel.fromJson(round)).toList();
+        final decoded = jsonDecode(json['rounds_details']);
+        if (decoded['rounds'] != null && decoded['rounds'] is List) {
+          roundsList = (decoded['rounds'] as List)
+              .map((e) => CompanyRoundModel.fromJson(e))
+              .toList();
+        }
       } catch (e) {
-        roundsList = [];
+        print("❌ Error parsing rounds_details: $e");
       }
     }
 
     return CampusDriveStudentModel(
-      studentCurrentRoundId: json['student_round_id'] ?? 0,
-      companyName: json['company_name'] ?? "",
-      studentCurrentRoundName: json['round_name'] ?? "",
-      studentCurrentRoundIndex: json['round_index'] ?? 0,
-      studentCurrentRoundMode: json['mode'] ?? "",
-      studentCurrentRoundStatus: json['status'] ?? "",
+      studentCurrentRoundId: json['student_round_id'],
+      companyName: json['company_name'] ?? '',
       rounds: roundsList,
+      status: json['status'],
+      date: json['date'],
+      time: json['time'],
+      package: json['package'],
+      location: json['location'],
+      otherInfo: json['other_info'],
+      batchInfoId: json['batch_info_id'],
+      companyType: json['company_type'],
+      companyWebsite: json['company_website'],
+      companyLinkedin: json['company_linkedin'],
     );
   }
 
@@ -54,37 +69,51 @@ class CampusDriveStudentModel {
     return {
       'student_round_id': studentCurrentRoundId,
       'company_name': companyName,
-      'round_name': studentCurrentRoundName,
-      'round_index': studentCurrentRoundIndex,
-      'mode': studentCurrentRoundMode,
-      'status': studentCurrentRoundStatus,
-      'rounds_details': rounds.map((round) => round.toJson()).toList(),
+      'rounds_details': jsonEncode({
+        'rounds': rounds.map((r) => r.toJson()).toList(),
+      }),
+      'status': status,
+      'date': date,
+      'time': time,
+      'package': package,
+      'location': location,
+      'other_info': otherInfo,
+      'batch_info_id': batchInfoId,
+      'company_type': companyType,
+      'company_website': companyWebsite,
+      'company_linkedin': companyLinkedin,
     };
   }
 }
 
-class CompanyRoundsModel {
+class CompanyRoundModel {
   int id;
   String roundName;
   int roundIndex;
   String mode;
   int campusPlacementInfoId;
+  int? studentRoundId;
+  String? studentRoundStatus;
 
-  CompanyRoundsModel({
+  CompanyRoundModel({
     required this.id,
     required this.roundName,
     required this.roundIndex,
     required this.mode,
     required this.campusPlacementInfoId,
+    this.studentRoundId,
+    this.studentRoundStatus,
   });
 
-  factory CompanyRoundsModel.fromJson(Map<String, dynamic> json) {
-    return CompanyRoundsModel(
+  factory CompanyRoundModel.fromJson(Map<String, dynamic> json) {
+    return CompanyRoundModel(
       id: json['id'] ?? 0,
-      roundName: json['round_name'] ?? "",
+      roundName: json['round_name'] ?? '',
       roundIndex: json['round_index'] ?? 0,
-      mode: json['mode'] ?? "",
+      mode: json['mode'] ?? '',
       campusPlacementInfoId: json['campus_placement_info_id'] ?? 0,
+      studentRoundId: json['student_round_id'],
+      studentRoundStatus: json['student_round_status'],
     );
   }
 
@@ -95,6 +124,8 @@ class CompanyRoundsModel {
       'round_index': roundIndex,
       'mode': mode,
       'campus_placement_info_id': campusPlacementInfoId,
+      'student_round_id': studentRoundId,
+      'student_round_status': studentRoundStatus,
     };
   }
 }
