@@ -7,6 +7,9 @@ class FacultyContactBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(InternetConnectivityController());
-    Get.put(FacultyContactController());
+
+    // Get studentId from Get.arguments
+    int studentId = Get.arguments['student_id'];
+    Get.put(FacultyContactController(studentId: studentId));
   }
 }
