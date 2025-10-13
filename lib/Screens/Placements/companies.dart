@@ -5,34 +5,36 @@ import 'package:ict_mu_students/Animations/slide_zoom_in_animation.dart';
 import 'package:ict_mu_students/Controllers/company_list_controller.dart';
 import 'package:ict_mu_students/Helper/Style.dart';
 import 'package:ict_mu_students/Screens/Loading/adaptive_loading_screen.dart';
+import 'package:ict_mu_students/Helper/Components.dart';
+import 'package:ict_mu_students/Helper/colors.dart';
+import 'package:ict_mu_students/Helper/size.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'company_detail_screen.dart';
-import '../../Helper/Components.dart';
-import '../../Helper/colors.dart';
-import '../../Helper/size.dart';
+import 'package:ict_mu_students/Screens/Placements/company_detail_screen.dart';
+import '../../Model/company_model.dart';
 
-// 🔹 Import CompanyDetailScreen
-import 'company_detail_screen.dart';
+/// ✅ URL Validation Helper
+bool isValidUrl(String? url) {
+  if (url == null || url.isEmpty) return false;
+  final Uri? uri = Uri.tryParse(url);
+  return uri != null && (uri.isScheme("http") || uri.isScheme("https"));
+}
 
+/// ✅ Main Company Screen
 class CompanyScreen extends GetView<CompanyListController> {
   const CompanyScreen({super.key});
+
 
   Future<void> _launchUrl(String? url, {bool isLinkedIn = false}) async {
     if (url == null || url.isEmpty) return;
 
     final Uri uri = Uri.parse(url);
-    if (isLinkedIn) {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-      }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri,
+          mode: isLinkedIn
+              ? LaunchMode.externalApplication
+              : LaunchMode.platformDefault);
     } else {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
-      } else {
-        Get.snackbar("Error", "Could not launch $url");
-      }
+      Get.snackbar("Error", "Could not launch $url");
     }
   }
 
@@ -42,15 +44,10 @@ class CompanyScreen extends GetView<CompanyListController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Companies",
-          style: appbarStyle(context),
-        ),
+        title: Text("Companies", style: appbarStyle(context)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded, color: backgroundColor),
-          onPressed: () {
-            Get.back();
-          },
+          onPressed: Get.back,
         ),
       ),
       body: Obx(
@@ -58,13 +55,13 @@ class CompanyScreen extends GetView<CompanyListController> {
           onRefresh: () => controller.fetchCompanyList(),
           child: Column(
             children: [
-              // 🔹 Search Bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: TextField(
                   controller: controller.searchController,
                   cursorColor: muColor,
                   focusNode: focusNode,
+                  onChanged: controller.filterCompanies,
                   decoration: InputDecoration(
                     labelText: 'Search Companies',
                     floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -74,7 +71,8 @@ class CompanyScreen extends GetView<CompanyListController> {
                     ),
                     prefixIcon: HugeIcon(
                       icon: HugeIcons.strokeRoundedSearch01,
-                      color: focusNode.hasPrimaryFocus ? muColor : muGrey2,
+                      color:
+                      focusNode.hasPrimaryFocus ? muColor : muGrey2,
                     ),
                     suffixIcon: controller.searchController.text.isNotEmpty
                         ? IconButton(
@@ -105,8 +103,6 @@ class CompanyScreen extends GetView<CompanyListController> {
                 ),
               ),
               const SizedBox(height: 10),
-
-              // 🔹 Company List
               Expanded(
                 child: controller.isLoadingCompanyList.value
                     ? const AdaptiveLoadingScreen()
@@ -122,25 +118,24 @@ class CompanyScreen extends GetView<CompanyListController> {
                 )
                     : ListView.builder(
                   itemCount: controller.filteredCompanyList.length,
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+                  padding:
+                  const EdgeInsets.fromLTRB(10, 0, 10, 20),
                   itemBuilder: (context, index) {
                     final company =
                     controller.filteredCompanyList[index];
                     return SlideZoomInAnimation(
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
-                        // 🔹 Make the whole card clickable
                         child: GestureDetector(
-                          onTap: () {
-                            // Navigate to detail page
-                            Get.to(() =>
-                                CompanyDetailScreen(company: company));
-                          },
+
+                          onTap: () => Get.to(() =>
+                              CompanyDetailScreen(company: company)),
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: muGrey,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius:
+                              BorderRadius.circular(10),
                             ),
                             width: double.infinity,
                             child: Row(
@@ -155,9 +150,10 @@ class CompanyScreen extends GetView<CompanyListController> {
                                       Row(
                                         children: [
                                           HugeIcon(
-                                              icon: HugeIcons
-                                                  .strokeRoundedHouse01,
-                                              color: muColor),
+                                            icon: HugeIcons
+                                                .strokeRoundedHouse01,
+                                            color: muColor,
+                                          ),
                                           const SizedBox(width: 7),
                                           Flexible(
                                             child: Text(
@@ -165,8 +161,8 @@ class CompanyScreen extends GetView<CompanyListController> {
                                               style: TextStyle(
                                                 fontWeight:
                                                 FontWeight.bold,
-                                                fontSize:
-                                                getSize(context, 2),
+                                                fontSize: getSize(
+                                                    context, 2),
                                               ),
                                               overflow: TextOverflow
                                                   .ellipsis,
@@ -178,9 +174,10 @@ class CompanyScreen extends GetView<CompanyListController> {
                                       Row(
                                         children: [
                                           HugeIcon(
-                                              icon: HugeIcons
-                                                  .strokeRoundedBriefcase01,
-                                              color: muColor),
+                                            icon: HugeIcons
+                                                .strokeRoundedBriefcase01,
+                                            color: muColor,
+                                          ),
                                           const SizedBox(width: 7),
                                           Flexible(
                                             child: Text(
@@ -201,23 +198,23 @@ class CompanyScreen extends GetView<CompanyListController> {
                                 Row(
                                   children: [
                                     IconButton(
-                                      onPressed:
-                                      company.companyWebsite.isEmpty
+                                      onPressed: !isValidUrl(company
+                                          .companyWebsite)
                                           ? null
-                                          : () => _launchUrl(
-                                          company
-                                              .companyWebsite),
+                                          : () => _launchUrl(company
+                                          .companyWebsite),
                                       icon: HugeIcon(
                                         icon: HugeIcons
                                             .strokeRoundedLink02,
-                                        color: company
-                                            .companyWebsite.isEmpty
-                                            ? Colors.grey
+                                        color: !isValidUrl(company
+                                            .companyWebsite)
+                                            ? Colors.white54
                                             : Colors.white,
                                       ),
                                       style: IconButton.styleFrom(
-                                        backgroundColor: company
-                                            .companyWebsite.isEmpty
+                                        backgroundColor:
+                                        !isValidUrl(company
+                                            .companyWebsite)
                                             ? Colors.grey
                                             : Colors.lightGreen,
                                         disabledBackgroundColor:
@@ -227,8 +224,8 @@ class CompanyScreen extends GetView<CompanyListController> {
                                     ),
                                     const SizedBox(width: 5),
                                     IconButton(
-                                      onPressed:
-                                      company.companyLinkedin.isEmpty
+                                      onPressed: !isValidUrl(company
+                                          .companyLinkedin)
                                           ? null
                                           : () => _launchUrl(
                                           company
@@ -237,14 +234,15 @@ class CompanyScreen extends GetView<CompanyListController> {
                                       icon: HugeIcon(
                                         icon: HugeIcons
                                             .strokeRoundedLinkedin01,
-                                        color: company.companyLinkedin
-                                            .isEmpty
+                                        color: !isValidUrl(company
+                                            .companyLinkedin)
                                             ? Colors.white54
                                             : Colors.white,
                                       ),
                                       style: IconButton.styleFrom(
-                                        backgroundColor: company
-                                            .companyLinkedin.isEmpty
+                                        backgroundColor:
+                                        !isValidUrl(company
+                                            .companyLinkedin)
                                             ? Colors.grey
                                             : LinkedinColor,
                                         disabledBackgroundColor:

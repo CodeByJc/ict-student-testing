@@ -17,73 +17,99 @@ class StudentRoundsScreen extends GetView<StudentRoundsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Campus Drive Rounds",
-          style: appbarStyle(context),
-        ),
+        title: Text("Campus Drive Rounds", style: appbarStyle(context)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded, color: backgroundColor),
-          onPressed: () {
-            Get.back();
-          },
+          onPressed: Get.back,
         ),
       ),
       body: AdaptiveRefreshIndicator(
         onRefresh: () async => await controller.fetchStudentRounds(),
         child: Obx(
-              () =>
-          controller.isLoading.value
-              ? const AdaptiveLoadingScreen()
-              : controller.studentDataList.isEmpty
-              ? const Center(child: Text('No data available'))
-              : ListView.builder(
-            padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
-            itemCount: controller.studentDataList.length,
-            itemBuilder: (context, index) {
-              final data = controller.studentDataList[index];
-              return SlideZoomInAnimation(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: muGrey,
-                    borderRadius: BorderRadius.circular(10),
+              () {
+            if (controller.isLoading.value) {
+              return const AdaptiveLoadingScreen();
+            }
+
+            // ✅ Filter only companies where student has applied to at least one round
+            final appliedCompanies = controller.studentDataList
+                .where((data) => data.rounds.any((r) => r.studentRoundId != null))
+                .toList();
+
+            if (appliedCompanies.isEmpty) {
+              return const Center(child: Text('No data available'));
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+              itemCount: appliedCompanies.length,
+              itemBuilder: (context, index) {
+                final data = appliedCompanies[index];
+                return SlideZoomInAnimation(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: muGrey,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Heading1(
+                          text: data.companyName,
+                          fontSize: 2.5,
+                          leftPadding: 0,
+                        ),
+                        SizedBox(
+                          height: 15,
+                          child: Divider(color: muGrey2),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: _buildStepper(context, data),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Heading1(
-                        text: data.companyName,
-                        fontSize: 2.5,
-                        leftPadding: 0,
-                      ),
-                      SizedBox(height: 15,
-                        child: Divider(color: muGrey2),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _buildStepper(context, data),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            );
+          },
         ),
+
       ),
     );
   }
 
   Widget _buildStepper(BuildContext context, CampusDriveStudentModel data) {
-    final rounds = data.rounds;
-    final currentIndex = data.studentCurrentRoundIndex;
-    final status = data.studentCurrentRoundStatus.toLowerCase();
+    // ✅ Only rounds where studentRoundId is not null
+    final rounds = data.rounds.where((r) => r.studentRoundId != null).toList();
+
+    if (rounds.isEmpty) {
+      return const Text("No rounds available");
+    }
+
+    // Determine current round index and status dynamically
+    int currentIndex = 0;
+    String overallStatus = "pending";
+
+    for (int i = 0; i < rounds.length; i++) {
+      final r = rounds[i];
+      if ((r.studentRoundStatus ?? "").toLowerCase() == "pass") {
+        currentIndex = i + 1; // completed round
+      }
+      if ((r.studentRoundStatus ?? "").toLowerCase() == "reject") {
+        overallStatus = "reject";
+        currentIndex = i + 1;
+        break;
+      }
+    }
 
     return Column(
       children: [
-        // Colored progress bar segments
+        // Progress segments
         Stack(
           alignment: Alignment.center,
           children: [
@@ -91,10 +117,8 @@ class StudentRoundsScreen extends GetView<StudentRoundsController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(rounds.length - 1, (index) {
                 Color segmentColor;
-                if (status == 'reject' && index + 1 == currentIndex - 1) {
+                if (overallStatus == 'reject' && index + 1 == currentIndex - 1) {
                   segmentColor = Colors.red;
-                } else if (status == 'reject' && index + 1 >= currentIndex) {
-                  segmentColor = Colors.grey;
                 } else if (index + 1 < currentIndex) {
                   segmentColor = Colors.green;
                 } else {
@@ -116,14 +140,22 @@ class StudentRoundsScreen extends GetView<StudentRoundsController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(rounds.length, (index) {
-                final stepColor = status == 'reject' && index + 1 == currentIndex
-                    ? Colors.red
-                    : index + 1 <= currentIndex
-                    ? Colors.green
-                    : Colors.grey;
+                final r = rounds[index];
+                final status = (r.studentRoundStatus ?? "").toLowerCase();
+                final isCompleted = status == "pass";
+                final isRejected = status == "reject";
+
+                Color stepColor;
+                if (isRejected) {
+                  stepColor = Colors.red;
+                } else if (isCompleted) {
+                  stepColor = Colors.green;
+                } else {
+                  stepColor = Colors.grey;
+                }
 
                 return Tooltip(
-                  message: rounds[index].roundName,
+                  message: r.roundName,
                   child: Container(
                     width: 30,
                     height: 30,
@@ -148,23 +180,29 @@ class StudentRoundsScreen extends GetView<StudentRoundsController> {
           ],
         ),
         const SizedBox(height: 10),
+
         // Round names
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rounds.asMap().entries.map((entry) {
-            final index = entry.key;
-            final round = entry.value;
+            final r = entry.value;
+            final status = (r.studentRoundStatus ?? "").toLowerCase();
+
+            Color textColor;
+            if (status == "reject") {
+              textColor = Colors.red;
+            } else if (status == "pass") {
+              textColor = Colors.green;
+            } else {
+              textColor = Colors.grey;
+            }
 
             return Flexible(
               child: Text(
-                round.roundName,
+                r.roundName,
                 style: TextStyle(
                   fontSize: getSize(context, 1.3),
-                  color: status == 'reject' && index + 1 == currentIndex
-                      ? Colors.red
-                      : index + 1 <= currentIndex
-                      ? Colors.green
-                      : Colors.grey,
+                  color: textColor,
                   overflow: TextOverflow.ellipsis,
                 ),
                 textAlign: TextAlign.center,

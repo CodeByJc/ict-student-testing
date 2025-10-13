@@ -8,8 +8,15 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../Helper/Components.dart';
 import '../../Model/company_model.dart';
 
+/// ✅ URL validation helper
+bool isValidUrl(String? url) {
+  if (url == null || url.isEmpty) return false;
+  final Uri? uri = Uri.tryParse(url);
+  return uri != null && (uri.isScheme('http') || uri.isScheme('https'));
+}
+
 class CompanyDetailScreen extends StatelessWidget {
-  final CompanyModel company; // Pass company object here
+  final CompanyModel company;
 
   const CompanyDetailScreen({super.key, required this.company});
 
@@ -24,6 +31,10 @@ class CompanyDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Validate URLs
+    final bool validWebsite = isValidUrl(company.companyWebsite);
+    final bool validLinkedin = isValidUrl(company.companyLinkedin);
+    print(company.aboutCompany);
     return Scaffold(
       appBar: AppBar(
         title: Text(company.companyName, style: appbarStyle(context)),
@@ -36,7 +47,7 @@ class CompanyDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(15.0),
         child: ListView(
           children: [
-            // Company Icon + Name
+            // ✅ Company Icon + Name
             Row(
               children: [
                 CircleAvatar(
@@ -59,54 +70,62 @@ class CompanyDetailScreen extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 20),
 
-            // Company Type
+            // ✅ Company Type
             ListTile(
               leading: HugeIcon(
                 icon: HugeIcons.strokeRoundedBriefcase01,
                 color: muColor,
               ),
-              title: Text("Type"),
+              title: const Text("Type"),
               subtitle: Text(company.companyType),
             ),
 
-            // Website
+            // ✅ Website (no gray background)
             ListTile(
-              leading: const HugeIcon(
+              leading: HugeIcon(
                 icon: HugeIcons.strokeRoundedLink02,
-                color: Colors.green,
+                color: validWebsite ? Colors.green : Colors.grey,
               ),
-              title: Text("Website"),
+              title: const Text("Website"),
               subtitle: Text(
-                company.companyWebsite.isNotEmpty
-                    ? company.companyWebsite
-                    : "Not Available",
+                validWebsite ? company.companyWebsite : "Not Available",
+                style: TextStyle(
+                  color: validWebsite ? Colors.blue : muGrey2,
+                  decoration:
+                  validWebsite ? TextDecoration.underline : null,
+                ),
               ),
-              onTap: company.companyWebsite.isNotEmpty
+              onTap: validWebsite
                   ? () => _launchUrl(company.companyWebsite)
                   : null,
             ),
 
-            // LinkedIn
+            // ✅ LinkedIn (no gray background)
             ListTile(
               leading: HugeIcon(
                 icon: HugeIcons.strokeRoundedLinkedin01,
-                color: LinkedinColor,
+                color: validLinkedin ? LinkedinColor : Colors.grey,
               ),
-              title: Text("LinkedIn"),
+              title: const Text("LinkedIn"),
               subtitle: Text(
-                company.companyLinkedin.isNotEmpty
-                    ? company.companyLinkedin
-                    : "Not Available",
+                validLinkedin ? company.companyLinkedin : "Not Available",
+                style: TextStyle(
+                  color: validLinkedin ? Colors.blue : muGrey2,
+                  decoration:
+                  validLinkedin ? TextDecoration.underline : null,
+                ),
               ),
-              onTap: company.companyLinkedin.isNotEmpty
+              onTap: validLinkedin
                   ? () => _launchUrl(company.companyLinkedin)
                   : null,
             ),
 
-            // Add more details if available
             const SizedBox(height: 20),
+
+            // ✅ About Section
             Text(
               "About Company",
               style: TextStyle(
@@ -115,8 +134,9 @@ class CompanyDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+
             Text(
-              (company.aboutCompany !=null &&
+              (company.aboutCompany != null &&
                   company.aboutCompany.trim().isNotEmpty &&
                   company.aboutCompany.toLowerCase() != "not available")
                   ? company.aboutCompany
