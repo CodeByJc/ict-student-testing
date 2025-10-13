@@ -6,11 +6,15 @@ import 'package:ict_mu_students/Model/faculty_contact_model.dart';
 import '../Helper/Utils.dart';
 import '../Network/API.dart';
 import 'internet_connectivity.dart';
+import '../../Model/mentor_model.dart';
 
 class FacultyContactController extends GetxController {
+  int studentId = Get.arguments['student_id'];
+  FacultyContactController({required this.studentId}); // constructor
   final internetController = Get.find<InternetConnectivityController>();
   RxList<FacultyContactModel> facultyContactList = <FacultyContactModel>[].obs;
-  int studentId = Get.arguments['student_id'];
+
+  Rx<MentorModel?> mentorDetails = Rx<MentorModel?>(null);
   RxBool isLoadingFacultyContact = true.obs;
   @override
   void onInit() {
@@ -20,6 +24,7 @@ class FacultyContactController extends GetxController {
 
   Future<void> fetchFacultyContact({required int sid}) async {
     isLoadingFacultyContact.value = true;
+
     await internetController.checkConnection();
     if (!internetController.isConnected.value) {
       isLoadingFacultyContact.value = false;
@@ -41,10 +46,15 @@ class FacultyContactController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body) as List<dynamic>;
+        final responseData = json.decode(response.body);
         facultyContactList.assignAll(
           responseData.map((data) => FacultyContactModel.fromJson(data)).toList(),
         );
+
+        // Parse mentor
+        if (responseData['mentor'] != null) {
+          mentorDetails.value = MentorModel.fromJson(responseData['mentor']);
+        }
       } else {
         final message = json.decode(response.body)['message'] ?? 'An error occurred';
         Get.snackbar(

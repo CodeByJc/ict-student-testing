@@ -9,13 +9,14 @@ import 'internet_connectivity.dart';
 
 class CampusDriveController extends GetxController {
   final internetController = Get.find<InternetConnectivityController>();
+
   RxList<CampusDriveModel> campusDriveList = <CampusDriveModel>[].obs;
   RxList<CampusDriveModel> filteredCampusDriveList = <CampusDriveModel>[].obs;
   RxBool isLoadingCampusDrive = false.obs;
   RxBool isLoadingStatusUpdate = false.obs;
+
   final TextEditingController searchController = TextEditingController();
   int studentId = Get.arguments['student_id'];
-
 
   @override
   void onInit() {
@@ -35,8 +36,10 @@ class CampusDriveController extends GetxController {
   Future<void> fetchCampusDriveList() async {
     int batchId = Get.arguments['batch_id'];
     int studentId = Get.arguments['student_id'];
+
     isLoadingCampusDrive.value = true;
     await internetController.checkConnection();
+
     if (!internetController.isConnected.value) {
       isLoadingCampusDrive.value = false;
       Utils().showInternetAlert(
@@ -45,6 +48,7 @@ class CampusDriveController extends GetxController {
       );
       return;
     }
+
     try {
       final response = await http.post(
         Uri.parse(campusDriveListAPI),
@@ -59,16 +63,28 @@ class CampusDriveController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // Explicitly cast the decoded JSON to List<Map<String, dynamic>>
         final List<dynamic> responseData = json.decode(response.body);
+
         campusDriveList.assignAll(
-          responseData
-              .map<CampusDriveModel>((data) => CampusDriveModel.fromJson(data as Map<String, dynamic>))
-              .toList(),
+          responseData.map<CampusDriveModel>(
+                (data) => CampusDriveModel.fromJson(data as Map<String, dynamic>),
+          ).toList(),
         );
-        filteredCampusDriveList.assignAll(campusDriveList); // Initialize filtered list
-      } else {
-        final message = json.decode(response.body)['message'] ?? 'An error occurred';
+
+        // DEBUG: Print all job profiles for each drive
+        for (var drive in campusDriveList) {
+          print("[DEBUG] Campus Drive → ${drive.companyName}");
+          print("[DEBUG] Job Profiles count: ${drive.jobProfiles.length}");
+          for (var job in drive.jobProfiles) {
+            print("[DEBUG] Job Profile → ID: ${job.profileId}, Name: ${job.profileName}, Category: ${job.category}");
+          }
+        }
+
+        filteredCampusDriveList.assignAll(campusDriveList);
+      }
+      else {
+        final message =
+            json.decode(response.body)['message'] ?? 'An error occurred';
         Get.snackbar(
           "No data available",
           message,
@@ -83,7 +99,7 @@ class CampusDriveController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      print(e);
+      print("CampusDrive fetch error: $e");
     } finally {
       isLoadingCampusDrive.value = false;
     }
@@ -129,7 +145,7 @@ class CampusDriveController extends GetxController {
       } else {
         final message = responseData['message'] ?? 'An error occurred';
         Get.snackbar(
-          "No data available",
+          "Error",
           message,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -147,17 +163,18 @@ class CampusDriveController extends GetxController {
     }
   }
 
-
   void filterCampusDrive(String query) {
     if (query.isEmpty) {
       filteredCampusDriveList.assignAll(campusDriveList);
     } else {
       filteredCampusDriveList.assignAll(
-        campusDriveList
-            .where((drive) => drive.campusDriveCompanyName
-            .toLowerCase()
-            .contains(query.toLowerCase()))
-            .toList(),
+        campusDriveList.where((drive) {
+          final companyNameMatch =
+          drive.companyName.toLowerCase().contains(query.toLowerCase());
+          final profileMatch = drive.jobProfiles.any((profile) =>
+              profile.profileName.toLowerCase().contains(query.toLowerCase()));
+          return companyNameMatch || profileMatch;
+        }).toList(),
       );
     }
   }

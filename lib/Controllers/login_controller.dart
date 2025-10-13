@@ -13,7 +13,12 @@ class LoginController extends GetxController {
   Future<bool> login(String username, String password) async {
     try {
       final fcmToken = SharedPrefs().getFCMToken;
-
+      print("username :");
+      print(username);
+      print("password :");
+      print(password);
+      print("device_token :");
+      print(fcmToken);
       Map<String, String> body = {
         'username': username,
         'password': password,
@@ -71,7 +76,6 @@ class LoginController extends GetxController {
         await box.write('loggedin', false);
         await box.write('userdata', null);
         Get.offNamed('/login');
-
         return true;
       } else {
         return false;
