@@ -6,8 +6,10 @@ import 'package:ict_mu_students/Bindings/campus_drive_bindings.dart';
 import 'package:ict_mu_students/Bindings/event_binding.dart';
 import 'package:ict_mu_students/Bindings/faculty_contact_binding.dart';
 import 'package:ict_mu_students/Bindings/feedback_binding.dart';
+import 'package:ict_mu_students/Bindings/job_market_binding.dart';
 import 'package:ict_mu_students/Bindings/holiday_list_binding.dart';
 import 'package:ict_mu_students/Bindings/leave_binding.dart';
+import 'package:ict_mu_students/Bindings/announcement_binding.dart';
 import 'package:ict_mu_students/Bindings/placement_binding.dart';
 import 'package:ict_mu_students/Bindings/profile_binding.dart';
 import 'package:ict_mu_students/Firebase/firebase_messaging_service.dart';
@@ -16,10 +18,12 @@ import 'package:ict_mu_students/Screens/Authentication/forgot_password.dart';
 import 'package:ict_mu_students/Screens/Events/event.dart';
 import 'package:ict_mu_students/Screens/Events/event_details.dart';
 import 'package:ict_mu_students/Screens/Holiday/holiday_list.dart';
+import 'package:ict_mu_students/Screens/JobMarket/live_job_market_screen.dart';
 import 'package:ict_mu_students/Screens/Leave/leaves.dart';
 import 'package:ict_mu_students/Screens/Placements/campus_drive_details.dart';
 import 'package:ict_mu_students/Screens/Placements/companies.dart';
 import 'package:ict_mu_students/Screens/Placements/interview_bank.dart';
+import 'package:ict_mu_students/Screens/Announcement/announcement_show.dart';
 import 'package:ict_mu_students/Screens/Splash/main_splash.dart';
 import 'package:ict_mu_students/Screens/Timetable/timetable.dart';
 import 'Bindings/change_password_binding.dart';
@@ -30,6 +34,8 @@ import 'Bindings/student_rounds_binding.dart';
 import 'Bindings/timetable_binding.dart';
 import 'Helper/colors.dart';
 import 'Screens/Attendance/attendance_show.dart';
+
+import 'Screens/CareerGuidance/career_guidance_screen.dart';
 import 'Screens/Authentication/change_password.dart';
 import 'Screens/Examination/exam_list.dart';
 import 'Screens/Faculty/faculty_contact.dart';
@@ -38,13 +44,19 @@ import 'Screens/Home/dashboard_home.dart';
 import 'Screens/Authentication/login.dart';
 import 'Screens/Placements/campus_drive.dart';
 import 'Screens/Placements/interview_bank_details.dart';
+import 'Screens/Placements/add_interview_bank.dart';
+import 'Screens/Placements/delete_interview_bank.dart';
 import 'Screens/Placements/placements.dart';
 import 'Screens/Placements/students_rounds.dart';
 import 'Screens/Profile/profile.dart';
+import 'Screens/CareerGuidance/career_guidance_screen.dart';
+import '../../Controllers/internet_connectivity.dart';
+import 'package:get/get.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  // Register InternetConnectivityController globally
+  Get.put(InternetConnectivityController(), permanent: true);
   //For Local Storage
   await SharedPrefs().init();
 
@@ -185,10 +197,34 @@ class MyApp extends StatelessWidget {
             binding: InterviewBankBinding(),
             page: () => const InterviewBankDetails()),
         GetPage(
+            name: "/addinterview",
+            transition: Transition.fadeIn,
+            binding: InterviewBankBinding(),
+            page: () => const AddInterviewBankScreen()),
+        GetPage(
+            name: "/deleteinterview",
+            transition: Transition.fadeIn,
+            binding: InterviewBankBinding(),
+            page: () => const DeleteInterviewBankScreen()),
+        GetPage(
             name: "/feedback",
             transition: Transition.fadeIn,
             binding: FeedbackBinding(),
             page: () =>  const FeedbackScreen()),
+        GetPage(
+            name: "/careerGuidance",
+            transition: Transition.fadeIn,
+            page: () => const CareerGuidanceScreen()),
+        GetPage(
+            name: "/JobMarket",
+            transition: Transition.fadeIn,
+            binding: JobMarketBinding(),
+            page: () => const LiveJobMarketScreen()),
+        GetPage(
+            name: "/announcement",
+            transition: Transition.fadeIn,
+            binding: AnnouncementBinding(),
+            page: () => const AnnouncementShowScreen()),
       ],
       initialRoute: "/splashscreen",
     );
