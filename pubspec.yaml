@@ -66,6 +66,7 @@ dependencies:
   permission_handler: ^11.3.1
   package_rename: ^1.9.0
   package_rename_plus: ^1.0.2
+  syncfusion_flutter_charts: ^30.2.6+1
 
 dev_dependencies:
   flutter_test:
