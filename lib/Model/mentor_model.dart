@@ -1,40 +1,31 @@
 class MentorModel {
-  final int mentorId;
-  final String fullName;
-  final String phone;
-  final String cabin;
-  final String designation;
-  final String photoUrl;
+  int mentorEmployeeId;
+  String mentorName;
+  String mentorCabin;
+  String mentorPhone;
 
   MentorModel({
-    required this.mentorId,
-    required this.fullName,
-    required this.phone,
-    required this.cabin,
-    required this.designation,
-    required this.photoUrl,
+    required this.mentorEmployeeId,
+    required this.mentorName,
+    required this.mentorCabin,
+    required this.mentorPhone,
   });
 
   factory MentorModel.fromJson(Map<String, dynamic> json) {
     return MentorModel(
-      mentorId: json['mentor_id'] ?? 0,
-      fullName: json['mentor_fullname'] ?? '',
-      phone: json['mentor_phone'] ?? 'N/A',
-      cabin: json['mentor_cabin'] ?? 'N/A',
-      designation: json['mentor_designation'] ?? 'Faculty',
-      photoUrl:
-      "https://marwadieducation.edu.in/MEFOnline/handler/getImage.ashx?Id=${json['mentor_id'] ?? 0}",
+      mentorEmployeeId: int.tryParse(json['mentor_employee_id'].toString()) ?? 0,
+    mentorName: json['mentor_name'] ?? "",
+      mentorCabin: json['mentor_cabin'] ?? "",
+      mentorPhone: json['mentor_phone'] ?? "",
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'mentor_id': mentorId,
-      'mentor_fullname': fullName,
-      'mentor_phone': phone,
-      'mentor_cabin': cabin,
-      'mentor_designation': designation,
-      'photoUrl': photoUrl,
+      'mentor_employee_id': mentorEmployeeId,
+      'mentor_name': mentorName,
+      'mentor_cabin': mentorCabin,
+      'mentor_phone': mentorPhone,
     };
   }
 }
