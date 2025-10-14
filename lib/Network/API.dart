@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 
 // ngrok public URL (changes every time you restart ngrok unless you have a reserved domain)
 const String host = "https://noninvincibly-unstocked-rosena.ngrok-free.dev";
-
 // relative path to your PHP API inside htdocs
 const String serverPath = "/ict-server-testing/api/index.php";
 
