@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/announcement_controller.dart';
+import '../../Helper/Colors.dart';
 import '../../Model/announcement_model.dart';
+import '../../Helper/colors.dart' hide muColor;
 
 class AnnouncementShowScreen extends StatelessWidget {
   const AnnouncementShowScreen({super.key});
@@ -44,9 +46,9 @@ class AnnouncementShowScreen extends StatelessWidget {
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.campaign_rounded,
-                    color: Colors.deepPurple,
+                    color: muColor,
                     size: 36,
                   ),
                   title: Text(

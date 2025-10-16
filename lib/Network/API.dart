@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 const String host = "https://noninvincibly-unstocked-rosena.ngrok-free.dev";
 // relative path to your PHP API inside htdocs
 const String serverPath = "/ict-server-testing/api/index.php";
-// build the base URL
 const String API_BASE_URL = "$host$serverPath";// Example usage
 String validateLoginAPI = "$host$serverPath/Student/login";
 
@@ -59,9 +58,6 @@ String interviewBankDeleteAPI = "$host$serverPath/InterviewBank/delete"; // appe
 
 
 String announcementListAPI = '$host$serverPath/Announcement/list';
-
-
-
 
 // ====================== EVENTS ======================
 String eventListAPI = '$host$serverPath/Event/list';
