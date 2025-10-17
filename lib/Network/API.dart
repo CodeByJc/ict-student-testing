@@ -2,23 +2,17 @@
 import 'package:http/http.dart' as http;
 
 // ngrok public URL (changes every time you restart ngrok unless you have a reserved domain)
-const String host = "https://baculine-afebrile-ellison.ngrok-free.app";
-
+const String host = "https://noninvincibly-unstocked-rosena.ngrok-free.dev";
 // relative path to your PHP API inside htdocs
 const String serverPath = "/ict-server-testing/api/index.php";
-
 // build the base URL
-const String API_BASE_URL = "$host$serverPath";
-
-// Example usage
-String validateLoginAPI = "$API_BASE_URL/Student/login";
+const String API_BASE_URL = "$host$serverPath"; // Example usage
+String validateLoginAPI = "$host$serverPath/Student/login";
 
 // App info
 String currentVersion = "1.0";
 String validApiKey = "ictmu";
 String updateURL = 'https://devanpatel28.blogspot.com/';
-
-// (Removed) Live Job Market: now configured directly in screen
 
 // ====================== AUTHENTICATION ======================
 String updatePasswordAPI = '$host$serverPath/Password/updatePassword';
@@ -31,6 +25,7 @@ String totalAttendanceAPI = '$host$serverPath/Attendance/TotalAttendance';
 String attendanceByDateAPI = '$host$serverPath/Attendance/AttendanceByDate';
 
 // ====================== PARENT / FACULTY ======================
+// Shows faculty details for the logged-in student's class
 String facultyContactAPI = '$host$serverPath/Parent/getFacultyContact';
 String timetableAPI = '$host$serverPath/Parent/getStudentTimetable';
 
@@ -57,6 +52,15 @@ String leaveHistoryAPI = '$host$serverPath/Leave/getLeaveHistory';
 
 // ====================== INTERVIEW BANK ======================
 String interviewBankListAPI = '$host$serverPath/InterviewBank/list';
+String interviewBankCreateAPI = "$host$serverPath/InterviewBank/create";
+String interviewBankGetAPI =
+    "$host$serverPath/InterviewBank/get"; // append &id=
+String interviewBankUpdateAPI =
+    "$host$serverPath/InterviewBank/update"; // append &id=
+String interviewBankDeleteAPI =
+    "$host$serverPath/InterviewBank/delete"; // append &id=
+
+String announcementListAPI = '$host$serverPath/Announcement/list';
 
 // ====================== EVENTS ======================
 String eventListAPI = '$host$serverPath/Event/list';
