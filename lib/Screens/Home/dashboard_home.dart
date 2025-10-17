@@ -153,7 +153,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
             InkWell(
               onTap: () => Get.toNamed("/holidayList"),
               highlightColor: backgroundColor,
@@ -210,6 +209,122 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Faculty",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder<http.Response>(
+              future: http.post(
+                Uri.parse(facultyContactAPI),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': validApiKey,
+                },
+                body: json.encode({'s_id': userData.studentDetails?.studentId}),
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.statusCode != 200) {
+                  return const SizedBox.shrink();
+                }
+                final List list = json.decode(snapshot.data!.body);
+                if (list.isEmpty) return const SizedBox.shrink();
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: list.length.clamp(0, 3),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final item = list[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: muColor, width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              offset: const Offset(0, 2),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          leading: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: muGrey2,
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: (item is Map &&
+                                    item.containsKey('faculty_id') &&
+                                    item['faculty_id'] != null)
+                                ? CachedNetworkImage(
+                                    imageUrl:
+                                        facultyImageAPI(item['faculty_id']),
+                                    fit: BoxFit.cover,
+                                    errorWidget: (c, u, e) => Center(
+                                      child: HugeIcon(
+                                          icon: HugeIcons.strokeRoundedUser,
+                                          color: muColor,
+                                          size: 22),
+                                    ),
+                                  )
+                                : Center(
+                                    child: HugeIcon(
+                                        icon: HugeIcons.strokeRoundedUser,
+                                        color: muColor,
+                                        size: 22),
+                                  ),
+                          ),
+                          title: Text(
+                            item['faculty_name'] ?? '-',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Faculty Subject: ${item['subject_name'] ?? '-'}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              // Text(
+                              //   "Subject Code: ${item['short_name'] ?? '-'}",
+                              //   maxLines: 1,
+                              //   overflow: TextOverflow.ellipsis,
+                              // ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -232,11 +347,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             upcomingHoliday = HolidayListModel.fromJson(responseData);
           });
         }
-      } else {
-        throw Exception(
-            "Failed to fetch holidays. Status code: ${response.statusCode}");
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Error fetching holiday list: $e");
     }
   }
