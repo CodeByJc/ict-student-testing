@@ -7,21 +7,21 @@ import '../Helper/colors.dart';
 import '../Helper/Components.dart';
 
 class TapIcon extends StatelessWidget {
-      final String name;
-      final double nameSize = 2;
-      final IconData iconData;
-      final double iconSize = 40;
-      final String route;
-      final routeArg;
+  final String name;
+  final double nameSize = 1.6;
+  final IconData iconData;
+  final double iconSize = 30;
+  final String route;
+  final routeArg;
 
-      const TapIcon({
-        super.key,
-        required this.name,
-        // required this.nameSize,
-        required this.iconData,
-        // required this.iconSize,
-        required this.route,
-        this.routeArg});
+  const TapIcon(
+      {super.key,
+      required this.name,
+      // required this.nameSize,
+      required this.iconData,
+      // required this.iconSize,
+      required this.route,
+      this.routeArg});
 
   @override
   Widget build(BuildContext context) {
@@ -30,36 +30,49 @@ class TapIcon extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 75,
-            width: 75,
+            height: 86,
+            width: 86,
             decoration: BoxDecoration(
-              color: muGrey,
-              borderRadius: BorderRadius.circular(15), // rounded corners
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  muGrey.withOpacity(0.7),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                ),
+              ],
             ),
             child: Center(
               child: HugeIcon(
                 icon: iconData,
-                color: Colors.black,
+                color: muColor,
                 size: iconSize,
               ),
             ),
           ),
           SizedBox(
-            height: getHeight(Get.context!, 0.01),
+            height: getHeight(Get.context!, 0.008),
           ),
           SizedBox(
-              height: getHeight(Get.context!, 0.05),
-              width: getWidth(Get.context!, 0.25),
+              height: getHeight(Get.context!, 0.04),
+              width: getWidth(Get.context!, 0.26),
               child: Text(
                 name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontFamily: 'mu_reg',
-                    color: muColor,
+                    color: Dark1,
                     height: 1,
                     fontSize: getSize(Get.context!, nameSize)),
-                // softWrap: true,
                 textAlign: TextAlign.center,
               ))
         ],
@@ -76,14 +89,14 @@ class TapIcon2 extends StatelessWidget {
   final String route;
   final routeArg;
 
-  const TapIcon2({
-    super.key,
-    required this.name,
-    // required this.nameSize,
-    required this.iconData,
-    // required this.iconSize,
-    required this.route,
-    this.routeArg});
+  const TapIcon2(
+      {super.key,
+      required this.name,
+      // required this.nameSize,
+      required this.iconData,
+      // required this.iconSize,
+      required this.route,
+      this.routeArg});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +122,6 @@ class TapIcon2 extends StatelessWidget {
                 ),
               ),
             ),
-
             SizedBox(
                 height: getHeight(Get.context!, 0.05),
                 width: getWidth(Get.context!, 0.30),
