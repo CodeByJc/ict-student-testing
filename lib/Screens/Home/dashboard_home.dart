@@ -161,7 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         iconData : HugeIcons.strokeRoundedMegaphone01,
                         route: "/announcement",
                         routeArg: {
-                          'batch_id': 1
+                          'batch_id': userData.studentDetails?.batchId
                         }),
                   ],
                 ),

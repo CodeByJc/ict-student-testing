@@ -7,8 +7,7 @@ import '../Network/API.dart';
 class AnnouncementController extends GetxController {
   var isLoading = true.obs;
   var announcements = <AnnouncementModel>[].obs;
-
-  late int batchId;
+  int batchId = Get.arguments['batch_id'];
 
   @override
   void onInit() {
